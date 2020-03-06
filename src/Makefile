@@ -1,37 +1,29 @@
+CC = clang
 
-CFLAGS = -g -Wall
+CFLAGS = -Wall -g -std=c99 
+LDFLAGS = -lpthread -g
+SRC = main.c Network.c Order_handler.c Time_out.c
 
-all: sverresnetwork.ok sverresnetwork.o test_getmyipaddress test_udplisten test_udpsend test_udpbroadcast test_tcp_server test_tcp_client test_sverresnetwork
+TARGET = main
 
-sverresnetwork.c: sverresnetwork.ok
 
-sverresnetwork.ok: ../sverresnetwork.org
-	clipprep ../sverresnetwork.org | tinyclip -va
-	touch $@
+all: $(TARGET)
 
-%.o: %.c
-	gcc -c $(CFLAGS) $< 
+# Define all object files.
+OBJ = $(SRC:.c=.o)
 
-sverresnetwork.o: sverresnetwork.h sverresnetwork.c
+# rule to link the program
+$(TARGET): $(OBJ)
+	$(CC) $^ -o $@ $(LDFLAGS)
 
-test_getmyipaddress: test_getmyipaddress.o sverresnetwork.o
-	gcc $(CFLAGS) test_getmyipaddress.o sverresnetwork.o -lpthread -o $@ 
+# Compile: create object files from C source files.
+%.o : %.c
+	$(CC) $(CFLAGS) -c  $< -o $@ 
 
-test_udplisten: test_udplisten.o sverresnetwork.o
-	gcc $(CFLAGS) test_udplisten.o sverresnetwork.o -lpthread -o $@ 
+# rule for cleaning re-compilable files.
+clean:
+	rm -f $(TARGET) $(OBJ)
 
-test_udpsend: test_udpsend.o sverresnetwork.o
-	gcc $(CFLAGS) test_udpsend.o sverresnetwork.o -lpthread -o $@ 
+rebuild:	clean all
 
-test_udpbroadcast: test_udpbroadcast.o sverresnetwork.o
-	gcc $(CFLAGS) test_udpbroadcast.o sverresnetwork.o -lpthread -o $@ 
-
-test_tcp_server: test_tcp_server.o sverresnetwork.o
-	gcc $(CFLAGS) test_tcp_server.o sverresnetwork.o -lpthread -o $@ 
-
-test_tcp_client: test_tcp_client.o sverresnetwork.o
-	gcc $(CFLAGS) test_tcp_client.o sverresnetwork.o -lpthread -o $@ 
-
-test_sverresnetwork: test_sverresnetwork.o sverresnetwork.o
-	gcc $(CFLAGS) test_sverresnetwork.o sverresnetwork.o -lpthread -o $@ 
-
+.PHONY: all rebuild clean

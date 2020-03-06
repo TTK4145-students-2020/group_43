@@ -9,6 +9,7 @@ the computer number 10 has for IP: 10.100.23.223
 to read a txt file on the terminal: vim
 	to edit, press a
 	to save press escape, then :wq
+	to quit without saving : escape, then :qa!
 
 Copying files to remote: scp -r fileOrFolderAtThisMachine username@#.#.#.#:fileOrFolderAtOtherMachine
 Copying files from remote: scp -r username@#.#.#.#:fileOrFolderAtOtherMachine fileOrFolderAtThisMachine

@@ -1,27 +1,29 @@
 #include "Network.h"
 
-void udpmessageReceived(const char* ip, char* data, int datalength)
+void msg network_receive_message(const char* ip, char* data, int datalength);
+
+void network_init()
 {
-    printf("Received UDP message from %s: '%s'\n", ip, data);
+    printf("Init the network ...\n");
+    //listening to the other elevators
+    udp_startReceiving(CLIENT_PORT, network_receive_message);
+}
+
+void network_receive_message(const char* ip, char* data, int datalength)
+{
+    printf("Received UDP message from %s\n", ip);
     network_message_t receivedMessage;
     memcpy(receivedMessage.message, data, LENGHT_MESSAGE);
     printf("if this string is the orderList struct, then we receive these data\n%d\t%d\t%d\t%d\t%f\n",
         receivedMessage.data.a, receivedMessage.data.b, receivedMessage.data.c, receivedMessage.data.d, receivedMessage.data.f);
 }
 
-int main() {
-    printf("hello\n\n"); //beginning of the code
-    //listening to the other elevators
-    udp_startReceiving(4321, udpmessageReceived);
+void network_boadcast_message(network_message_t* msg)
+{
+    udp_broadcast(SERVER_PORT, msg.message, LENGHT_MESSAGE);
+}
 
-    orderList_t orderList;
-    //set some data in the union = the list of order
-    memcpy(orderList.data.msg, "hello from Santid", 20);
-    orderList.data.a = -1;
-    orderList.data.b = -300;
-    orderList.data.c = 300;
-    orderList.data.d = 100;
-    orderList.data.f = 1.3;
+int main() {
 
     while (1)
     {

@@ -1,10 +1,10 @@
-CC = clang
+CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = main.c Network.c Order_handler.c Time_out.c
+SRC = timerTest.cpp order_timer.cpp order_timer_implementation.cpp
 
-TARGET = main
+TARGET = timerTest
 
 
 all: $(TARGET)

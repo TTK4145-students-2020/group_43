@@ -1,6 +1,6 @@
 #include "Network.h"
 
-void msg network_receive_message(const char* ip, char* data, int datalength);
+void network_receive_message(const char* ip, char* data, int datalength);
 
 void network_init()
 {
@@ -12,12 +12,12 @@ void network_init()
 void network_receive_message(const char* ip, char* data, int datalength)
 {
     printf("Received UDP message from %s\n", ip);
-    order_data_t received_order;
+    order_data_t* received_order = nullptr;
     memcpy(received_order, data, LENGHT_MESSAGE); // convert the message in a readable order
     /*printf("if this string is the orderList struct, then we receive these data\n%d\t%d\t%d\t%d\t%f\n",
         receivedMessage.data.a, receivedMessage.data.b, receivedMessage.data.c, receivedMessage.data.d, receivedMessage.data.f);
         */
-    Order_update_queue(&received_order);
+    order_update_queue(received_order);
 }
 
 void network_boadcast_message(order_data_t* order)

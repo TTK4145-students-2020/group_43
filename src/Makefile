@@ -1,9 +1,8 @@
 CC = clang++
 
-CFLAGS = -Wall -g -std=c99 
+CFLAGS = -Wall -g 
 LDFLAGS = -lpthread -g
-SRC = timerTest.cpp order_timer.cpp order_timer_implementation.cpp
-
+SRC = timerTest.cpp order_timer.cpp order_timer_implementation.cpp Network.cpp sverresnetwork.cpp
 TARGET = timerTest
 
 

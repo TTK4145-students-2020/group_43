@@ -1,8 +1,12 @@
+#ifndef #define NETWORK_H
+#define NETWORK_H
+
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include "sverresnetwork.h"
+#include "Order_handler.h" //to giev the received order into the order_handler module
 
 #define COMPUTER_9_IP (char*) "10.100.23.223"
 #define SERVER_PORT 20010 //Port where we send messages
@@ -23,19 +27,12 @@ typedef order_data_t
 
 typedef union
 {
-    struct
-    {
-        uint8_t     id; //include the order of the order (what order did we received first)
-        uint8_t     floor;
-        bool        direction;
-        uint32_t    recpetion_time;
-        int8_t      owner; //who is taking the order? -1 if nobody
-        //uint32_t  take_time; //should be useless as we have the timout module
-        uint8_t     destination_floor;
-    }order_data_t;
+    order_data_t order_data;
 
     char message[LENGHT_MESSAGE];
 }network_message_t;
 
 void network_boadcast_message(network_message_t* msg);
 void network_init();
+
+#endif // !#define NETWORK_H

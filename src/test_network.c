@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+void order_update_queue(order_data_t* received_order)
+{
+    printf("Order ID number %u received\n", received_order->id);
+}
+
 int main()
 {
     order_data_t order;
@@ -17,7 +22,9 @@ int main()
     while(1)
     {
         order.id = i++;
+        printf("send message ...\n");
         network_broadcast_message(&order);
         sleep(2);
     }
+    return 0;
 }

@@ -14,6 +14,6 @@
 #define LENGHT_MESSAGE 500 // the max length is theoreticaly 512, but it does not work with me. can be reduced for gainz to sizeof(order_data)
 
 void network_init();
-void network_boadcast_message(order_data_t* msg);
+void network_broadcast_message(order_data_t* msg);
 
 #endif // !#define NETWORK_H

@@ -1,10 +1,14 @@
-CC = clang++
+CC = clang 
 
-CFLAGS = -Wall -g 
+CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = timerTest.cpp order_timer.cpp order_timer_implementation.cpp Network.cpp sverresnetwork.cpp
-TARGET = timerTest
+SRC = test_network.c sverresnetwork.c Network.c
+TARGET = test_network
 
+
+# does everything to tst the network
+network: test_network.c sverresnetwork.c Network.c
+	gcc test_network.c Network.c sverresnetwork.c -o test_network -lpthread -Wall
 
 all: $(TARGET)
 
@@ -24,5 +28,6 @@ clean:
 	rm -f $(TARGET) $(OBJ)
 
 rebuild:	clean all
+
 
 .PHONY: all rebuild clean

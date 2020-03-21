@@ -1,4 +1,4 @@
-#ifndef #define NETWORK_H
+#ifndef NETWORK_H
 #define NETWORK_H
 
 #include <stdio.h>
@@ -23,14 +23,6 @@ typedef order_data_t
     //uint32_t  take_time; //should be useless as we have the timout module
     uint8_t     destination_floor;
 };
-
-
-typedef union
-{
-    order_data_t order_data;
-
-    char message[LENGHT_MESSAGE];
-}network_message_t;
 
 void network_boadcast_message(network_message_t* msg);
 void network_init();

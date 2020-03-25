@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
-#include "sverresnetwork.h"
+#include "../src/sverresnetwork.h"
 
 void udpmessageReceived(const char * ip, char * data, int datalength){
 

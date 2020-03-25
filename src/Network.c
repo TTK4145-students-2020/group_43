@@ -15,6 +15,7 @@ void network_init()
 {
     printf("Init the network ...\n");
     //listening to the other elevators
+	printf("Start receiving in port %d ...\n",CLIENT_PORT);
     udp_startReceiving(CLIENT_PORT, network_receive_message);
 }
 
@@ -23,7 +24,8 @@ void network_broadcast_message(order_data_t* order)
 {
     char msg[LENGHT_MESSAGE];
     memcpy(msg, order, LENGHT_MESSAGE); //convert the order struct into sendable char*
-    udp_broadcast(SERVER_PORT, msg, LENGHT_MESSAGE);
+    udp_broadcast(SERVER_PORT, msg, LENGHT_MESSAGE+2); //+2 is not needed, be careful of the termination though
+	//udp_broadcast(4321,"Hello all",10);
 }
 
 /*

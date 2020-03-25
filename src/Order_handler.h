@@ -1,8 +1,6 @@
 #ifndef ORDER_HANDLER_H
 #define ORDER_HANDLER_H
 
-//#include "Network.h"
-
 typedef struct 
 {
     uint8_t     id; //include the ortder order (what order did we received first)

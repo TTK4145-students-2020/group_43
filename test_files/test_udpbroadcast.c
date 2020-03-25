@@ -14,7 +14,7 @@ main(){
 	
 	while (1) 
 	{
-		printf("sending hello \n");
+		printf("sending hello\n");
 		udp_broadcast(4321,"Hello all",10);
 		sleep(2);
 	}

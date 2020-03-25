@@ -13,8 +13,11 @@ void udpmessageReceived(const char * ip, char * data, int datalength){
 int main(){
 
   udp_startReceiving(4321,udpmessageReceived);
-
-  sleep(100);
+	while(1) 
+	{
+		udp_broadcast(4321,"Hello all",10);
+		sleep(1);
+	}
   return 0;
 }
 

@@ -6,9 +6,11 @@
 #include "elevator_io_device.h"
 #include "requests.h"
 
+#define TRAVEL_TIME 1
+
 int timeToServeRequest(Elevator e_old, Button b, floor f){
     Elevator e = e_old;
-    const double DOOR_OPEN_TIME = e.config.doorOpenDuration_s
+    const double DOOR_OPEN_TIME = e.config.doorOpenDuration_s;
     elevator.requests[f][b] = 1;
 
     int arrivedAtRequest = 0;

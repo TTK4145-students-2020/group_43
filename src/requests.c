@@ -98,6 +98,19 @@ Elevator requests_clearAtCurrentFloor(Elevator e){
     return e;
 }
 
+Elevator requests_clearAtCurrentFloor(Elevator e_old, void onClearedRequest(Button b, int floor)){
+    Elevator e = e_old;
+    for(Button btn = 0; btn < N_BUTTONS; btn++){
+        if(e.requests[e.floor][btn]){
+            e.requests[e.floor][btn] = 0;
+            if(onClearedRequest){
+                onClearedRequest(btn, floor);
+            }
+        }
+    }
+    return e;
+}
+
 
 
 

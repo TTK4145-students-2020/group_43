@@ -11,19 +11,21 @@ void network_receive_message(const char* ip, char* data, int datalength)
     order_update_queue(&received_order);
 }
 
-void network_init()
+void network_init(uint16_t port)
 {
     printf("Init the network ...\n");
     //listening to the other elevators
-    udp_startReceiving(CLIENT_PORT, network_receive_message);
+	printf("Start receiving in port %d ...\n",port);
+    udp_startReceiving(port, network_receive_message);
 }
 
-
-void network_broadcast_message(order_data_t* order)
+	
+void network_broadcast_message(order_data_t* order, uint16_t port)
 {
     char msg[LENGHT_MESSAGE];
     memcpy(msg, order, LENGHT_MESSAGE); //convert the order struct into sendable char*
-    udp_broadcast(SERVER_PORT, msg, LENGHT_MESSAGE);
+    udp_broadcast(port, msg, LENGHT_MESSAGE+2); //+2 is not needed, be careful of the termination though
+	//udp_broadcast(4321,"Hello all",10);
 }
 
 /*

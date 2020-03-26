@@ -1,14 +1,11 @@
-CC = clang 
+CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = test_network.c sverresnetwork.c Network.c
-TARGET = test_network
+SRC = main.c Network.c Order_handler.c Time_out.c
+þ
+TARGET = main
 
-
-# does everything to tst the network
-network: test_network.c sverresnetwork.c Network.c
-	gcc test_network.c Network.c sverresnetwork.c -o test_network -lpthread -Wall
 
 all: $(TARGET)
 
@@ -28,6 +25,5 @@ clean:
 	rm -f $(TARGET) $(OBJ)
 
 rebuild:	clean all
-
 
 .PHONY: all rebuild clean

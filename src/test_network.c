@@ -20,6 +20,7 @@ int main(int argc,char** argv)
 	
 	if(argc > 1)
 	{
+		//printf("the number of first parameter is %d",int(argv[1][0]));
 		if(argv[1][0] == '1' ) //configuration 1
 		{
 			printf("Other config \n");

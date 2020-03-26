@@ -15,4 +15,10 @@ Copying files to remote: scp -r fileOrFolderAtThisMachine username@#.#.#.#:fileO
 Copying files from remote: scp -r username@#.#.#.#:fileOrFolderAtOtherMachine fileOrFolderAtThisMachine
 
 
+Notes from meeting:
+-Endre: to implement order timeout handler # would be useful to have som global variable to keep track of which elevators are alive
+-Theo: to finish network
+-Magne: to finish request handler
+Duedate: 03.04
+
 

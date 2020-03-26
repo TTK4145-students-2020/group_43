@@ -11,12 +11,20 @@ void network_receive_message(const char* ip, char* data, int datalength)
     order_update_queue(&received_order);
 }
 
-void network_init(uint16_t port)
-{
+void network_init(uint16_t elevatorId)
+{	
     printf("Init the network ...\n");
     //listening to the other elevators
-	printf("Start receiving in port %d ...\n",port);
-    udp_startReceiving(port, network_receive_message);
+	for (uint8_t i = 1; i<= NUMBER_ELEVATOR;i++) //create a listenning thread for each other elevator
+	{
+		if (i!=elevatorId)
+		{
+			udp_startReceiving(CLIENT_PORT+i, network_receive_message);
+			printf("Start receiving in port %d ...\n",CLIENT_PORT+i);
+		}
+	}
+	sleep(2);
+	printf("Init the network ... DONE\n");
 }
 
 	

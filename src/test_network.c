@@ -15,19 +15,13 @@ int main(int argc,char** argv)
 	#else
 	printf("considering C code\n");
 	#endif
-	uint16_t client_port = CLIENT_PORT;
 	uint16_t server_port = SERVER_PORT;
-	
+	uint8_t elevatorId;
 	if(argc > 1)
 	{
-		printf("the number of first parameter is %d",(int) (argv[1][0])-'0');
-		if(argv[1][0] == '1' ) //configuration 1
-		{
-			printf("Other config \n");
-			uint16_t temp  = client_port;
-			client_port = server_port;
-			server_port = temp;
-		}
+		elevatorId = (uint8_t)(argv[1][0]-'0');
+		printf("program for elevator number %u out of %d started\n",elevatorId,NUMBER_ELEVATOR);
+		server_port += elevatorId;
 	}
 	else
 	{
@@ -38,7 +32,7 @@ int main(int argc,char** argv)
 	}
 	
 	
-	network_init(client_port);
+	network_init(elevatorId);
 	
     order_data_t order;
     
@@ -53,7 +47,7 @@ int main(int argc,char** argv)
     while(1)
     {
         order.id = i++;
-        printf("send message ...\n");
+        printf("broadcast message to port %d...\n",server_port);
         network_broadcast_message(&order, server_port);
         sleep(2);
     }

@@ -3,14 +3,16 @@ CC = clang
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
 SRC = test_network.c sverresnetwork.c Network.c
-TARGET = test_network
+SRC_network = test_network.c Network.c sverresnetwork.c Order_handler.c
+TARGET = elevator_project
 
 
 # does everything to tst the network
 network: test_network.c sverresnetwork.c Network.c
-	gcc test_network.c Network.c sverresnetwork.c Order_handler.c -o test_network -lpthread -Wall
+	$(CC) $(SRC_network) -o $@ $(LDFLAGS)
+	
 
-all: $(TARGET)
+all: $(TARGET) network
 
 # Define all object files.
 OBJ = $(SRC:.c=.o)

@@ -9,24 +9,8 @@ int main(int argc,char** argv)
 	#else
 	printf("considering C code\n");
 	#endif
-	uint16_t server_port = SERVER_PORT;
-	uint8_t elevatorId;
-	if(argc > 1)
-	{
-		elevatorId = (uint8_t)(argv[1][0]-'0');
-		printf("program for elevator number %u out of %d started\n",elevatorId,NUMBER_ELEVATOR);
-		server_port += elevatorId;
-	}
-	else
-	{
-		printf("please add a parameter when calling the program.\n");
-		printf("To realise a proper test of the network module, \n");
-		printf("Start the program twice with 0 and 1 as parameter\n");
-		return 0;
-	}
 	
-	
-	network_init(elevatorId);
+	network_init();
 	
     order_data_t order;
     
@@ -41,8 +25,8 @@ int main(int argc,char** argv)
     while(1)
     {
         order.id = i++;
-        printf("broadcast message to port %d...\n",server_port);
-        network_broadcast_message(&order, CLIENT_PORT); //should be server_port
+        printf("broadcast message...\n");
+        network_broadcast_message(&order); //should be server_port
         sleep(2);
     }
     return 0;

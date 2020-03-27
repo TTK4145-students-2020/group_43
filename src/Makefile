@@ -8,7 +8,7 @@ TARGET = test_network
 
 # does everything to tst the network
 network: test_network.c sverresnetwork.c Network.c
-	gcc test_network.c Network.c sverresnetwork.c -o test_network -lpthread -Wall
+	gcc test_network.c Network.c sverresnetwork.c Order_handler.c -o test_network -lpthread -Wall
 
 all: $(TARGET)
 

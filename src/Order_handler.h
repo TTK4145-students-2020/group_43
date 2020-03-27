@@ -1,6 +1,11 @@
 #ifndef ORDER_HANDLER_H
 #define ORDER_HANDLER_H
 
+//#include <unistd.h>
+#include <stdint.h>
+#include <stdio.h>
+
+
 typedef struct 
 {
     uint8_t     id; //include the ortder order (what order did we received first)
@@ -16,6 +21,6 @@ typedef struct
 }order_data_t;
 
 
-void order_update_queue(order_data_t* received_order); //
+void order_update_queue(order_data_t received_order); //
 #endif //ORDER_HANDLER_H
 

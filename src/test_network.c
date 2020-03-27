@@ -2,12 +2,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void order_update_queue(order_data_t* received_order)
-{
-    printf("Order ID number %u received\n", received_order->id);
-	printf("is it going here\n");
-}
-
 int main(int argc,char** argv)
 {
 	#ifdef __cplusplus
@@ -48,7 +42,7 @@ int main(int argc,char** argv)
     {
         order.id = i++;
         printf("broadcast message to port %d...\n",server_port);
-        network_broadcast_message(&order, server_port);
+        network_broadcast_message(&order, CLIENT_PORT); //should be server_port
         sleep(2);
     }
     return 0;

@@ -114,6 +114,7 @@ thr_udpListen(void * arg){
   if(m_log) printf("Sverresnetwork: udpListen: Binding to port %d\n",threadListItem->port);
 
   while(1){
+	printf("thread alive\n");
     res = recvfrom(threadListItem->socket, buf, BUFLEN, 0,(struct sockaddr *) &si_other, &slen);
     if(res == -1) error("thr_udpListen:recvfrom");
     if(res >= BUFLEN-1){
@@ -122,6 +123,7 @@ thr_udpListen(void * arg){
     }
     // printf("Received packet from %s:%d\nLength = %d, Data: <%s>\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), res,buf);
      (*(threadListItem->callBack))(inet_ntoa(si_other.sin_addr),buf,res);
+	printf("thread alive after callback\n");
   }
 
   // Never executed - this thread will be killed if it is not needed any more.

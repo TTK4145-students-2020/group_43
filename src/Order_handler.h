@@ -7,7 +7,7 @@
 
 typedef struct 
 {
-    uint8_t     id; //include the ortder order (what order did we received first)
+    int8_t     id; //include the ortder order (what order did we received first)
     uint8_t     floor;
 	#ifdef __cplusplus
     bool        direction; //1 for up
@@ -21,5 +21,7 @@ typedef struct
 
 
 void order_update_queue(order_data_t received_order); //
+void order_initOrderList();
+
 #endif //ORDER_HANDLER_H
 

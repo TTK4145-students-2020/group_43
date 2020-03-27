@@ -4,6 +4,8 @@
 
 int main(int argc,char** argv)
 {
+	printf("size of order = %lu vs uint8_t = %lu\n",sizeof(order_data_t),sizeof(uint8_t));
+    
 	#ifdef __cplusplus
 	printf("considering C++ code\n");
 	#else
@@ -13,7 +15,7 @@ int main(int argc,char** argv)
 	network_init();
 	
     order_data_t order;
-    
+	
     order.id = 0;
     order.floor = 0;
     order.direction = 1;
@@ -26,7 +28,7 @@ int main(int argc,char** argv)
     {
         order.id = i++;
         printf("broadcast message...\n");
-        network_broadcast_message(&order); //should be server_port
+        network_broadcastMessage(&order); //should be server_port
         sleep(2);
     }
     return 0;

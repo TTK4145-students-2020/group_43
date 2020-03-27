@@ -1,5 +1,8 @@
 #include "Network.h"
 
+order_data_t received_order;
+
+
 void order_update_queue_2(order_data_t received_order)
 {
     //printf("Order ID number %u received\n", received_order->id);
@@ -15,7 +18,6 @@ void network_receive_message(const char* ip, char* data, int datalength)
 		return;
 	}
     printf("Received UDP message from %s\n", ip);
-    order_data_t received_order;
     memcpy(&received_order, data, datalength); // convert the message in a readable order
     /*printf("if this string is the orderList struct, then we receive these data\n%d\t%d\t%d\t%d\t%f\n",
         receivedMessage.data.a, receivedMessage.data.b, receivedMessage.data.c, receivedMessage.data.d, receivedMessage.data.f);

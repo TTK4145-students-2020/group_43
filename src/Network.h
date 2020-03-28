@@ -7,6 +7,7 @@
 #include <string.h> //for memcpy
 #include "sverresnetwork.h"
 #include "Order_handler.h" //to give the received order into the order_handler module
+#include "order_timer.hpp"
 
 #define COMPUTER_9_IP (char*) "10.100.23.223"
 #define COMM_PORT 4300 //Port to receive and send messages with the other elevators
@@ -15,6 +16,7 @@
 #define POS_ID_MESSAGE 0
 #define NUMBER_ELEVATOR 3
 #define NUMBER_MESSAGES 3 //number of messages to send for redudancy
+#define TIMEOUT_RECEIVE_MESSAGE 1
 #define ERROR_INCONSITANT_MESSAGE 255
 
 void network_init();

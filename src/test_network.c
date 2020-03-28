@@ -28,8 +28,7 @@ int main(int argc,char** argv)
     {
         order.id = i++;
         printf("broadcast message %d times for redundancy...\n",NUMBER_MESSAGES);
-        for(uint8_t i = 0;i<NUMBER_MESSAGES;i++)
-			network_broadcastMessage(&order); //should be server_port
+		network_broadcastMessage(&order); //should be server_port
         sleep(2);
     }
     return 0;

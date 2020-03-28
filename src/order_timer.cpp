@@ -1,6 +1,6 @@
 #include "order_timer.hpp"
 
-order_timer::order_timer(order* order_ptr, double duration)
+order_timer::order_timer(order_data_t* order_ptr, double duration)
     :   implementation(order_timer_implementation(order_ptr, duration)) 
 {
     implementation.start_timer_thread();

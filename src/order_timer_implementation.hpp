@@ -1,5 +1,6 @@
 #pragma once
 #include "globals.hpp" //might delete when merging
+#include "Order_handler.h"
 #include <pthread.h>
 
 
@@ -10,10 +11,10 @@ private:
     pthread_mutex_t timer_mutex;
     pthread_t timer_thread;
     double duration;
-    order* order_ptr;
+    order_data_t* order_ptr;
     bool timeout;
 public:
-    order_timer_implementation(order* order_ptr, double duration);
+    order_timer_implementation(order_data_t* order_ptr, double duration);
     ~order_timer_implementation();
 
     int start_timer_thread();

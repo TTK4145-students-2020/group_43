@@ -8,11 +8,11 @@ static double get_wall_time(void){
     return (double)time.tv_sec + (double)time.tv_usec * .000001;
 }
 
-void* wrap_timer_work(void* p){
+void* wrap_timer_work(order_data_t* p){
         ((order_timer_implementation*)p)->timer_work();
     return NULL;
 }
-order_timer_implementation::order_timer_implementation(order* order_ptr, double duration):
+order_timer_implementation::order_timer_implementation(order_data_t* order_ptr, double duration):
     order_ptr(order_ptr),
     duration(duration),
     timeout(false)

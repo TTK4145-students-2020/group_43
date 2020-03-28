@@ -92,9 +92,8 @@ void network_broadcastMessage(order_data_t* order)
 {
     char msg[LENGHT_MESSAGE];
     memcpy(msg, order, LENGHT_MESSAGE); //convert the order struct into sendable char*
-    udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
-	udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
-	udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
+	for(uint8_t i = 0;i<NUMBER_MESSAGES;i++)
+		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
 }
 
 void network_askRecovery()

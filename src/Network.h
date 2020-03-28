@@ -12,8 +12,8 @@
 #define COMM_PORT 4300 //Port to receive and send messages with the other elevators
 #define LENGHT_MESSAGE 500 // the max length is theoreticaly 512, but it does not work with me. can be reduced for gainz to sizeof(order_data)
 #define ID_ASK_RECOVER -1
-
-#define NUMBER_ELEVATOR 2
+#define POS_ID_MESSAGE 0
+#define NUMBER_ELEVATOR 3
 #define NUMBER_MESSAGES 3 //number of messages to send for redudancy
 #define ERROR_INCONSITANT_MESSAGE 255
 

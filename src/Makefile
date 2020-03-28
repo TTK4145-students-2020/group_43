@@ -2,7 +2,7 @@ CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = timerTest.cpp order_timer.cpp order_timer_implementation.cpp
+SRC = timerTest.cpp orderTimer.cpp orderTimerImplementation.cpp
 
 TARGET = timerTest
 

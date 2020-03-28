@@ -5,16 +5,20 @@ void network_receive_message();
 void network_translateMessageToOrder(char* msg,order_data_t* order);
 void network_printRawMessage(char* msg, uint16_t size);
 void network_freeBufferReceivedMessage(uint8_t position);
+void network_checkAndRecoverTimesOut();
 
 order_data_t received_order;
 char receivedMessage[NUMBER_ELEVATOR][NUMBER_MESSAGES][LENGHT_MESSAGE];
 uint8_t numberOfMessagesReceived[NUMBER_ELEVATOR];
+order_timer* receiveMessageTimer[NUMBER_ELEVATOR];
+
 //we want to be able to store all (NUMBER_MESSAGES) the messages (LENGHT_MESSAGE) sent by other elevators (NUMBER_ELEVATOR-1  +1). +1 for more freedom if something goes wrong
 
 
 
 void network_receive_message(const char* ip, char* data, int datalength)
 {
+	//TODO: check that we do'nt receive our own message checking the IP Address.
 	if (datalength !=LENGHT_MESSAGE)
 	{
 		printf("Unknown message\n");
@@ -27,14 +31,11 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	uint8_t positionFound = 0;
 	//first char is the ID
 	uint8_t id_message = data[POS_ID_MESSAGE];
-	printf("ID of the message is %d\n",id_message);
 	//check if we already received this message ID
 	for(position = 0; position<NUMBER_ELEVATOR;position++)
 	{
-		printf("postion = %d\n",position);
 		if(receivedMessage[position][0][POS_ID_MESSAGE] == id_message) 
 		{//exit the for while saving the position
-			printf("we already have stored this ID in position %d\n",position);
 			positionFound = 1;
 			break; //exits the for to keep the postion in memory
 		}
@@ -42,13 +43,17 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	if (positionFound==0)
 	{
 		printf("//it is the first message with this ID that we receive\n");
-		//TODO: start timer for receiving messages (we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
 		//look for a free place to store the comming messages
+		network_checkAndRecoverTimesOut();
 		for(position = 0; position<NUMBER_ELEVATOR;position++)
 		{
+			
 			if(receivedMessage[position][0][POS_ID_MESSAGE] == 0)
 			{//this place is free
 				positionFound = 1;
+				//start timer for receiving messages (we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
+				memcpy(&received_order, receivedMessage[position][0], LENGHT_MESSAGE);
+				receiveMessageTimer[position] = new order_timer(&received_order, TIMEOUT_RECEIVE_MESSAGE);   //Start timer
 				break;
 			}
 		}
@@ -131,5 +136,27 @@ void network_printRawMessage(char* msg, uint16_t size)
 void network_freeBufferReceivedMessage(uint8_t position)
 {
 	numberOfMessagesReceived[position] = 0;
-	receivedMessage[position][0][POS_ID_MESSAGE] = 0; //it is enough to only reset the ID of the first message as it is what we look when check if the place if free
+	for (uint8_t msg=0;msg<NUMBER_MESSAGES;msg++)
+		memset(receivedMessage[position][msg],0,LENGHT_MESSAGE);
+	//free the timer?
+}
+
+void network_checkAndRecoverTimesOut()
+{
+	for(uint8_t pos = 0; pos< NUMBER_ELEVATOR; pos++)
+	{
+		if(receiveMessageTimer[pos]->is_timed_out())
+		{
+			printf("Time out for message at position %d. Checking if we ca extract data\n",pos);
+			uint8_t num_msg = network_checkMessage(pos);
+			if (num_msg != ERROR_INCONSITANT_MESSAGE)
+			{
+				printf("we could save the message\n");
+				memcpy(&received_order,receivedMessage[pos][num_msg],LENGHT_MESSAGE);
+				order_update_queue(received_order);
+			}
+			receiveMessageTimer[pos]->stop_timer();
+		}
+				
+	}
 }

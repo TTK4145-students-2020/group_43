@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "globals.hpp"
-#include "orderTimer.hpp"
+#include "threadTimer.hpp"
 
 int main(){
     char c = 0;
@@ -14,8 +14,8 @@ int main(){
         {
             scanf("%c", &c);
         }
-        order myOrder = { .data = 0};
-        orderTimer myTimer(&myOrder, duration);               //Starts timer
+        //order myOrder = { .data = 0};
+        threadTimer myTimer(duration);               //Starts timer
         printf("\ntimeout: %i", myTimer.isTimedOut());    //Check flag
         int i = 0;
         while (!myTimer.isTimedOut())
@@ -23,9 +23,9 @@ int main(){
             //printf("timeout: %i", myTimer.isTimedOut());
             if (i==2)
             {
-                //printf("\nResetting timer");
-                //myTimer.resetTimer();
-                myTimer.stopTimer(); printf("\nStopping timer");
+                
+                myTimer.resetTimer(); printf("\nResetting timer");
+                //myTimer.stopTimer(); printf("\nStopping timer");
             }
             printf("\nmain thread sleeping ..");
             sleep(1);

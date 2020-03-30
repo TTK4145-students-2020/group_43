@@ -23,8 +23,9 @@ int main(){
             //printf("timeout: %i", myTimer.isTimedOut());
             if (i==2)
             {
-                printf("\nResetting timer");
-                myTimer.resetTimer();
+                //printf("\nResetting timer");
+                //myTimer.resetTimer();
+                myTimer.stopTimer(); printf("\nStopping timer");
             }
             printf("\nmain thread sleeping ..");
             sleep(1);

@@ -20,4 +20,5 @@ public:
     bool getTimeout();
     void* timerWork();
     int killTimerThread(); //returns 0 if successful
+    void resetTimer();
 };

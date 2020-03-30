@@ -11,8 +11,15 @@ int orderTimer::isTimedOut()
     return implementation.getTimeout();
 }
 
-int orderTimer::stop_timer(){
+int orderTimer::stopTimer(){
     return implementation.killTimerThread();
 }
+void orderTimer::resetTimer(){
+    implementation.resetTimer();
+    return;
+}
 
-orderTimer::~orderTimer() {}
+orderTimer::~orderTimer() {
+    implementation.~orderTimerImplementation();
+    return;
+}

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include "orderTimerImplementation.hpp"
+#include <unistd.h>
 
 static double get_wall_time(void){
     struct timeval time;
@@ -13,7 +14,7 @@ void* wrapTimerWork(void* p){
     return NULL;
 }
 orderTimerImplementation::orderTimerImplementation(order* orderptr, double duration):
-    order_ptr(order_ptr),
+    orderptr(orderptr),
     duration(duration),
     timeout(false)
 {
@@ -23,11 +24,13 @@ orderTimerImplementation::orderTimerImplementation(order* orderptr, double durat
 
 orderTimerImplementation::~orderTimerImplementation()
 {
-
+    killTimerThread();
+    pthread_join(timerThread, NULL);
+    return;
 }
 
 
-void* orderTimerImplementation::timer_work(){
+void* orderTimerImplementation::timerWork(){
     double endtime = get_wall_time() + duration;
     while (endtime > get_wall_time()){ 
         usleep(1); 
@@ -60,4 +63,5 @@ void orderTimerImplementation::resetTimer(){
     timeout = false;
     pthread_mutex_unlock(&timerMutex);
     startTimerThread();
+    return;
 }

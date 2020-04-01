@@ -23,7 +23,6 @@ typedef struct {
     Dirn                    dirn;
     int                     requests[N_FLOORS][N_BUTTONS];
     ElevatorBehaviour       behaviour;
-    
     struct {
         ClearRequestVariant clearRequestVariant;
         double              doorOpenDuration_s;

@@ -27,7 +27,7 @@ typedef order_data_t
 
 /* changes to network_receive_message(const char* ip, char* data, int datalength):
     -replace order_update_queue(received_order) with
-        requestHandler_handleAssignedRequest(recieved_order)
+        requestHandler_handleAssignedRequest(e,otherelevators, recieved_order, false)
 */
 
 void requestHandler_handleAssignedRequest(Elevator elevator, Elevator otherElevators[], order_data_t assignedRequest, bool requestFromMyElevator) {
@@ -53,9 +53,6 @@ void requestHandler_handleAssignedRequest(Elevator elevator, Elevator otherEleva
     
 }
 
-bool requestHandler_takeAssignedRequest(Elevator elevator, order_data_t assignedRequest) {
-    return (assignedRequest.taken == -1 && assignedRequest.ownerId == elevator.id)
-}
 
 // returns an assigned request, where the id of the chosen elevator is included
 order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherElevators[], int btn_floor, Button btn_type) {

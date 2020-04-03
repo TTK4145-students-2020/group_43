@@ -3,33 +3,12 @@
 
 #include "elevator_io_types.h"
 #include "costFunc.h"
-#include "fsm.h"
 #include "Network.h"
-#include "orderTimer.hpp"
 // #include order_timer____.h
 
-#include "request_handler.h"
+#include "requestHandler.h"
 
-/*  
-    - slimmed down order_data_t
-    - think we only need 4 variables actually, btn_floor, btn_type, taken, ownerId
-    - can't find where original is defined anymore, so defined my version here for now 
-*/ 
-
-typedef order_data_t
-{
-    uint8_t     btn_floor;
-    Button      btn_type;
-    //uint32_t    recpetion_time;
-    int8_t      taken; // -1 if not taken; 1 for taken; 0 for no order
-    int8_t      ownerId;
-};
-
-/* changes to network_receive_message(const char* ip, char* data, int datalength):
-    -replace order_update_queue(received_order) with
-        requestHandler_handleAssignedRequest(e,otherelevators, recieved_order, false)
-*/
-
+/*
 void requestHandler_handleAssignedRequest(Elevator elevator, Elevator otherElevators[], order_data_t assignedRequest, bool requestFromMyElevator) {
     if (assignedRequest.taken == -1) {
         if (assignedRequest.ownerId == elevator.id) {
@@ -51,10 +30,16 @@ void requestHandler_handleAssignedRequest(Elevator elevator, Elevator otherEleva
             }
         }
         
-    }
-    
+    }   
 }
+*/
 
+bool requestHandler_toTakeAssignedRequest(Elevator elevator, order_data_t assignedRequest) {
+    if (assignedRequest.owner == elevator.id) {
+        return true;
+    }
+    return false;
+}
 
 // returns an assigned request, where the id of the chosen elevator is included
 order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherElevators[], int btn_floor, Button btn_type) {
@@ -75,9 +60,9 @@ order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherEl
     }
     cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
-    for (int i=1; i<N_ELEVATORS; i++) {
-        if (elevatorList[i].active) {
-            cost[i] = costFunc_timeToServeRequest(otherElevators[i-1], btn_type, btn_floor);
+    for (int i=0; i<N_ELEVATORS-1; i++) {
+        if (otherElevators[i].active) {
+            cost[i+1] = costFunc_timeToServeRequest(otherElevators[i], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;
             }

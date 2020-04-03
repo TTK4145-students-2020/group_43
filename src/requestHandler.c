@@ -45,7 +45,9 @@ void requestHandler_handleAssignedRequest(Elevator elevator, Elevator otherEleva
         for (int i = 0; i<N_ELEVAORS-1; i++) {
             if (otherElevators[i].id == assignedRequest.ownerId) {
                 otherElevators[i].requests[assignedRequest.btn_floor][assignedRequest.btn_type] = 1;
-                start timerThread for other elevator which has ownerId if that elevator is Idle (has no timer thread)
+                //start timerThread for other elevator which has ownerId if that elevator is Idle (has no timer thread)
+                if (otherElevators[i].behaviour == EB_Idle)
+                    otherElevators[i].timer.resetTimer();
             }
         }
         

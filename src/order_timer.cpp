@@ -15,4 +15,5 @@ int order_timer::stop_timer(){
     return implementation.kill_timer_thread();
 }
 
-order_timer::~order_timer() {}
+order_timer::~order_timer() {
+}

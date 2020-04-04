@@ -78,6 +78,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
 		}
 		network_translateMessageToOrder(receivedMessage[position][correctMessage],&received_order);
 		network_freeBufferReceivedMessage(position);
+		//delete/stop timer
 		order_update_queue(received_order); //no pointer because we want order_handler to copy the order.
 	}    
 }

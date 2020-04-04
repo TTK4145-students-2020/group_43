@@ -1,9 +1,9 @@
-CC = clang 
+CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
 SRC = test_network.c sverresnetwork.c Network.c
-SRC_network = test_network.c Network.c sverresnetwork.c Order_handler.c
+SRC_network = test_network.c Network.c sverresnetwork.c Order_handler.c order_timer.cpp order_timer_implementation.cpp
 TARGET = elevator_project
 
 

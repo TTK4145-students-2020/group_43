@@ -36,15 +36,21 @@ int main(int argc,char** argv)
     order.button = 1;
     order.owner = -1;
     
+	elevator_data_t elevator;
+	elevator.floor =1;
+	
     uint8_t i = 1;
 	sleep(2);
     while(1)
     {
         order.floor = i++;
+		elevator.floor =2*i;
         printf("broadcast message %d times for redundancy...\n",NUMBER_MESSAGES);
 		//network_broadcastMessage(&order); 
-		network_broadcastMessage(&order);
+		network_broadcast(&order);
         sleep(2);
+		network_broadcast(&elevator);
+		sleep(2);
     }
     return 0;
 }

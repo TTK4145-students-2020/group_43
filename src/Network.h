@@ -16,7 +16,8 @@
 
 
 void network_init(uint8_t probaErr);
-void network_broadcastMessage(order_data_t* order);
+void network_broadcast(order_data_t* msg);
+void network_broadcast(elevator_data_t* msg);
 void network_askRecovery();
 
 #endif // !#define NETWORK_H

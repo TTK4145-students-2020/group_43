@@ -1,13 +1,15 @@
 #include "Network.h"
 
-uint8_t network_checkMessage(uint8_t pos);
 void network_receive_message();
-void network_translateMessageToOrder(char* msg,order_data_t* order);
-void network_printRawMessage(char* msg, uint16_t size);
+void network_forwardMessage(char* msg);
+void network_broadcastMessage(message_t* order);
+uint8_t network_checkMessage(uint8_t pos);
+void decodeMessage(char* msg,order_data_t* order); //TODO: may be removable
 void network_freeBufferReceivedMessage(uint8_t position);
 void network_checkAndRecoverTimesOut();
+void network_printRawMessage(char* msg, uint16_t size);
 
-order_data_t received_order;
+message_t received_msg;
 char receivedMessage[NUMBER_ELEVATOR][NUMBER_MESSAGES][LENGHT_MESSAGE];
 uint8_t numberOfMessagesReceived[NUMBER_ELEVATOR];
 order_timer* receiveMessageTimer[NUMBER_ELEVATOR];
@@ -25,17 +27,11 @@ void network_receive_message(const char* ip, char* data, int datalength)
 		printf("Unknown message\n");
 		return;
 	}
-    printf("Received UDP message from %s:\n", ip);
-	//network_printRawMessage(data,LENGHT_MESSAGE);
+    printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
+    //network_printRawMessage(data,LENGHT_MESSAGE);
 	
-	if((uint8_t) data[1] >= ID_ASK_RECOVER)
-	{
-		//network_broadcastMessage(requestHdler_getElevator(data[i]- ID_ASK_RECOVER));
-	}
 	uint8_t position;
 	uint8_t positionFound = 0;
-	//first char is the ID
-	uint8_t id_message = data[POS_ID_MESSAGE];
 	//check if we already received this message ID
 	for(position = 0; position<NUMBER_ELEVATOR;position++)
 	{
@@ -58,7 +54,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
 			{//this place is free
 				positionFound = 1;
 				
-				memcpy(&received_order, receivedMessage[position][0], LENGHT_MESSAGE);
+				//memcpy(&received_order, receivedMessage[position][0], LENGHT_MESSAGE);
 				//receiveMessageTimer[position].start();//Start timer (we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
 				printf("start timer done ... \n");
 				break;
@@ -85,12 +81,13 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	}
 	printf("we gonna store this message in position %d ; %u to analyse it\n",position,numberOfMessagesReceived[position]);
 	//now position is the place where we should store the data
+	
 	//add the message received to the group of the same messages	
 	memcpy(receivedMessage[position][numberOfMessagesReceived[position]], data, LENGHT_MESSAGE);
 	numberOfMessagesReceived[position]++;
 	if (numberOfMessagesReceived[position] == NUMBER_MESSAGES)
 	{
-		printf("let us check if message is valide\t");
+		printf("let us check if the message is valide\t");
 		uint8_t correctMessagePos = network_checkMessage(position);
 		printf("valide msg is nb %u\n" , correctMessagePos);
 		if (correctMessagePos == ERROR_INCONSITANT_MESSAGE)
@@ -98,10 +95,9 @@ void network_receive_message(const char* ip, char* data, int datalength)
 			printf("\n /!\\We don't take into account this message as we received it noisy\n");
 			return; //we don't take the message into account because we received it wrong
 		}
-		network_translateMessageToOrder(receivedMessage[position][correctMessagePos],&received_order);
+		network_forwardMessage(receivedMessage[position][correctMessagePos]);
 		network_freeBufferReceivedMessage(position);
 		//delete/stop timer
-		order_update_queue(received_order); //no pointer because we want order_handler to copy the order.
 	}    
 }
 
@@ -116,13 +112,28 @@ void network_init(uint8_t probaErr)
 	memset(receivedMessage,0,sizeof(receivedMessage));
 	memset(numberOfMessagesReceived,0,sizeof(numberOfMessagesReceived));
 	for (uint8_t i = 0; i < NUMBER_ELEVATOR ; i++)
-		receiveMessageTimer[i] = new order_timer(&received_order,1);
+		receiveMessageTimer[i] = new order_timer(&received_msg.data.order,1);
 	sleep(2);
-	printf("Init the network ... DONE\n");
+	printf("Init the network ... DONE\n\n");
 }
 
+void network_broadcast(order_data_t* order)
+{
+	message_t msg;
+	msg.id = ID_ORDER_MESSAGE;
+	msg.data.order = *order;
+	network_broadcastMessage(&msg);
+}
 
-void network_broadcastMessage(order_data_t* order)
+void network_broadcast(elevator_data_t* elData)
+{
+	message_t msg;
+	msg.id = ID_ELEVATOR_MESSAGE;
+	msg.data.elevator = *elData;
+	network_broadcastMessage(&msg);
+}
+
+void network_broadcastMessage(message_t* order)
 {
 	char msg[LENGHT_MESSAGE];
     memcpy(msg, order, LENGHT_MESSAGE); //convert the order struct into sendable char*
@@ -141,9 +152,10 @@ void network_broadcastMessage(order_data_t* order)
 
 void network_askRecovery()
 {
-	char msg = ID_ASK_RECOVER + ID_ELEVATOR; //200
-	udp_broadcast(COMM_PORT, &msg, LENGHT_MESSAGE); //send message to the others to send their data over the network
-	
+	message_t recoveryMsg;
+	recoveryMsg.id = ID_ASK_RECOVER;
+	recoveryMsg.data.recoveryId = ID_ELEVATOR;
+	network_broadcastMessage(&recoveryMsg); //send message to the others to send their data over the network
 }
 
 void network_translateMessageToOrder(char* msg,order_data_t* order)
@@ -192,11 +204,30 @@ void network_checkAndRecoverTimesOut()
 				if (num_msg != ERROR_INCONSITANT_MESSAGE)
 				{
 					printf("we could save the message\n");
-					memcpy(&received_order,receivedMessage[pos][num_msg],LENGHT_MESSAGE);
-					order_update_queue(received_order);
+					network_forwardMessage(receivedMessage[pos][num_msg]);
 				}
 				receiveMessageTimer[pos]->stop_timer();
 			}		
 		}
+	}
+}
+
+void network_forwardMessage(char* msg)
+{
+	memcpy(&received_msg, msg, LENGHT_MESSAGE);
+	switch (received_msg.id)
+	{
+		case ID_ORDER_MESSAGE:
+			order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
+			break;
+		case ID_ELEVATOR_MESSAGE:
+			order_update_elevator(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
+			break;
+		case ID_ASK_RECOVER:
+			printf("\nask for recovery\n\n");
+			//network_broadcastMessage(requestHdler_getElevator(receivedMessage.recoveryId);				
+			break;
+		default:
+			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
 	}
 }

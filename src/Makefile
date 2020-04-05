@@ -2,20 +2,17 @@ CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = test_network.c sverresnetwork.c Network.c
+SRC = order_timer.cpp order_timer_implementation.cpp timerTest.cpp
 SRC_network = test_network.c Network.c sverresnetwork.c Order_handler.c order_timer.cpp order_timer_implementation.cpp
 TARGET = elevator_project
 
 
-# does everything to tst the network
-network: test_network.c sverresnetwork.c Network.c
-	$(CC) $(SRC_network) -o $@ $(LDFLAGS)
-	
 
-all: $(TARGET) network
+
+all: $(TARGET) 
 
 # Define all object files.
-OBJ = $(SRC:.c=.o)
+OBJ = $(SRC:.cpp=.o)
 
 # rule to link the program
 $(TARGET): $(OBJ)
@@ -27,9 +24,12 @@ $(TARGET): $(OBJ)
 
 # rule for cleaning re-compilable files.
 clean:
-	rm -f $(TARGET) $(OBJ)
+	rm -f $(TARGET) *.o
 
 rebuild:	clean all
 
-
+# does everything to tst the network
+network: test_network.c sverresnetwork.c Network.c
+	$(CC) $(SRC_network) -o $@ $(LDFLAGS)
+	
 .PHONY: all rebuild clean

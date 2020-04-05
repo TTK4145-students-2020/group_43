@@ -29,6 +29,7 @@ int main(int argc,char** argv)
 	#endif
 	
 	network_init(probaRandomError);
+	sleep(2); // it takes some time in another thread
 	
     order_data_t order;
 	

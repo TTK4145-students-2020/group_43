@@ -8,16 +8,6 @@
 
 //--------------NETWORK-----------
 #define COMPUTER_9_IP (char*) "10.100.23.223"
-#define COMM_PORT 4300 //Port to receive and send messages with the other elevators
-#define LENGHT_MESSAGE 500 // the max length is theoreticaly 512, but it does not work with me. can be reduced for gainz to sizeof(order_data)
-#define ID_ASK_RECOVER 200
-#define ID_ORDER_MESSAGE 1
-#define ID_ELEVATOR_MESSAGE 2
-
-
-#define NUMBER_MESSAGES 3 //number of messages to send for redudancy
-#define TIMEOUT_RECEIVE_MESSAGE 0.01 //seconds
-#define ERROR_INCONSITANT_MESSAGE 255
 
 static uint8_t ID_ELEVATOR;
 
@@ -47,17 +37,3 @@ typedef struct
 	int8_t		requests[N_FLOORS][N_BUTTONS]; //todo, check if it can be bools, and if it takes less bytes to have it as bool
 	ElevatorBehaviour_t 	behaviour; //from the fsm
 }elevator_data_t;
-
-
-
-//I want a structure with one Byte for the ID and then the message
-typedef struct
-{
-	uint8_t id;
-	union 
-	{
-		order_data_t	order;
-		elevator_data_t elevator;
-		uint8_t			recoveryId;
-	}data;
-}message_t;

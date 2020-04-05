@@ -14,6 +14,7 @@ public:
     order_timer(order_data_t* order_ptr, double duration); /* Starts a timer which sets a timeout-flag after duration [s]*/
     int is_timed_out(); //Returns the timeout-flag; is 1 when timed out, 0 when not
     int stop_timer(); //Stops timer. Returns 0 if successful. (Frees up the processor)
+	double getTime() {return 0;};
 
     ~order_timer();
 };

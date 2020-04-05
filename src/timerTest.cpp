@@ -14,11 +14,10 @@ int main(){
         {
             scanf("%c", &c);
         }
-        //order myOrder = { .data = 0};
+        order_data_t myOrder = { .data = 0};
         threadTimer myTimer(duration);               //Starts timer
         printf("\ntimeout: %i", myTimer.isTimedOut());    //Check flag
-        int i = 0;
-        while (!myTimer.isTimedOut())
+        for (int i = 0; i < 5; i++)
         {
             //printf("timeout: %i", myTimer.isTimedOut());
             if (i==2)

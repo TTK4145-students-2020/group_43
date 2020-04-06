@@ -15,11 +15,12 @@ void* wrapTimerWork(void* p){
 }
 threadTimerImplementation::threadTimerImplementation(double duration):
     duration(duration),
-    timeout(false)
+    startTime(0.0);
+    timeout(false),
+    threadRunning(false);
 {
     pthread_mutex_init(&timerMutex, NULL);
 }
-
 
 threadTimerImplementation::~threadTimerImplementation()
 {
@@ -28,9 +29,9 @@ threadTimerImplementation::~threadTimerImplementation()
     return;
 }
 
-
 void* threadTimerImplementation::timerWork(){
-    double endtime = get_wall_time() + duration;
+    startTime = get_wall_time();
+    double endtime = startTime + duration;
     while (endtime > get_wall_time()){ 
         usleep(1); 
     }
@@ -42,16 +43,17 @@ void* threadTimerImplementation::timerWork(){
 
 int threadTimerImplementation::startTimerThread()
 {
-    pthread_create(&timerThread, NULL, &wrapTimerWork, (void*)this);   
+    pthread_create(&timerThread, NULL, &wrapTimerWork, (void*)this);
+    threadRunning = true;
     return 1;
 }
-
 
 bool threadTimerImplementation::getTimeout(){
     return timeout;
 }
 
 int threadTimerImplementation::killTimerThread(){
+    threadRunning = false;
     return pthread_cancel(timerThread);
 }
 
@@ -64,3 +66,12 @@ void threadTimerImplementation::resetTimer(){
     startTimerThread();
     return;
 }
+
+int threadTimerImplementation::isThreadRunning(){
+    return (int)threadRunning;
+}
+
+double threadTimerImplementation::getTime(){
+    return startTime() + get_wall_time();
+}
+

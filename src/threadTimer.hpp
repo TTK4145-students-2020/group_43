@@ -14,6 +14,7 @@ public:
     void start(); //Starts timer. Will restart timer if already running.
     int stop(); //Stops timer. Returns 0 if successful. (Frees up the processor)
     int isAlive();  //Returns 1 if the timer thread is currently running
-    double getTime();
+    double getTime(); // Returns the timers current elapsed duration
+
     ~threadTimer(); //Stops timer thread
 };

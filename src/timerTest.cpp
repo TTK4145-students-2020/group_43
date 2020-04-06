@@ -1,39 +1,30 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include "globals.hpp"
 #include "threadTimer.hpp"
 
 int main(){
-    char c = 0;
-    double duration = 3;
-    
-    while(1){
-        printf("\ninitate timer? press y then enter:");
-        while (c != 'y')
-        {
-            scanf("%c", &c);
-        }
-        //order myOrder = { .data = 0};
-        threadTimer myTimer(duration);               //Starts timer
-        printf("\ntimeout: %i", myTimer.isTimedOut());    //Check flag
-        int i = 0;
-        while (!myTimer.isTimedOut())
-        {
-            //printf("timeout: %i", myTimer.isTimedOut());
-            if (i==2)
-            {
-                
-                myTimer.resetTimer(); printf("\nResetting timer");
-                //myTimer.stopTimer(); printf("\nStopping timer");
-            }
-            printf("\nmain thread sleeping ..");
-            sleep(1);
-            i++;
-        }
+    double duration = 6;
+    threadTimer myTimer(duration);
+    printf("alive?  %d\n", myTimer.isAlive());
+    myTimer.start();               //Starts timer
+    printf("timeout: %i\n", myTimer.isTimedOut());  //fflush(stdout); //Check flag 
+    int i = 0;
+    while (!myTimer.isTimedOut())
+    {
         
-        printf("\ntimeout: %i", myTimer.isTimedOut());
-        c = 'n';
+        if (!(i % 5))
+            printf("timeout: %i ", myTimer.isTimedOut()); 
+            printf("alive?  %d  ", myTimer.isAlive());  
+            printf("timer:    %f\n", myTimer.getTime());
+        if (i == 3*10)
+            myTimer.start();
+            //myTimer.stop();
+        usleep(100000);
+        i++;
     }
+    printf("alive?  %d", myTimer.isAlive());
+    printf("timeout: %i\n", myTimer.isTimedOut());
+    printf("end\n");
     return 0;
 }

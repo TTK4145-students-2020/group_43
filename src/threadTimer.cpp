@@ -16,10 +16,13 @@ void threadTimer::start(){
     return;
 }
 int threadTimer::stop(){
-    return implementation.killTimerThread();
+    return implementation.stopThread();
 }
 int threadTimer::isAlive(){
     return implementation.isThreadRunning();
+}
+double threadTimer::getTime(){
+    return implementation.getTime();
 }
 threadTimer::~threadTimer() {
     implementation.~threadTimerImplementation();

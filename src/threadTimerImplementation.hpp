@@ -6,7 +6,9 @@
 class threadTimerImplementation
 {
 private:
-    pthread_mutex_t timerMutex;
+    pthread_mutex_t timerMtx;
+    pthread_mutex_t startTimeMtx;
+    pthread_mutex_t runningMtx;
     pthread_t timerThread;
     double duration;
     double startTime;
@@ -19,7 +21,8 @@ public:
     int startTimerThread();
     bool getTimeout();
     void* timerWork();
-    int killTimerThread(); //returns 0 if successful
+    int killTimerThread();
+    int stopThread();
     void resetTimer();
     int isThreadRunning();
     double getTime();

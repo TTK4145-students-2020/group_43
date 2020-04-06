@@ -15,36 +15,46 @@ void* wrapTimerWork(void* p){
 }
 threadTimerImplementation::threadTimerImplementation(double duration):
     duration(duration),
-    startTime(0.0);
+    startTime(-1.0),
     timeout(false),
-    threadRunning(false);
+    threadRunning(false)
 {
-    pthread_mutex_init(&timerMutex, NULL);
+    pthread_mutex_init(&timerMtx, NULL);
+    pthread_mutex_init(&startTimeMtx, NULL);
+    pthread_mutex_init(&runningMtx, NULL);
 }
 
-threadTimerImplementation::~threadTimerImplementation()
+threadTimerImplementation::~threadTimerImplementation() // This is probably completely unnecessary
 {
-    killTimerThread();
-    pthread_join(timerThread, NULL);
+    stopThread();
     return;
 }
 
 void* threadTimerImplementation::timerWork(){
+    pthread_mutex_lock(&startTimeMtx);
     startTime = get_wall_time();
     double endtime = startTime + duration;
+    pthread_mutex_unlock(&startTimeMtx);
     while (endtime > get_wall_time()){ 
         usleep(1); 
     }
-    pthread_mutex_lock(&timerMutex);
+    pthread_mutex_lock(&timerMtx);
     timeout = true;
-    pthread_mutex_unlock(&timerMutex);
+    pthread_mutex_unlock(&timerMtx);
+    pthread_mutex_lock(&runningMtx);
+    threadRunning = false;
+    pthread_mutex_unlock(&runningMtx);
     return NULL;
 }
 
 int threadTimerImplementation::startTimerThread()
 {
+    
     pthread_create(&timerThread, NULL, &wrapTimerWork, (void*)this);
+    pthread_mutex_lock(&runningMtx);
     threadRunning = true;
+    pthread_mutex_unlock(&runningMtx);
+    
     return 1;
 }
 
@@ -53,25 +63,45 @@ bool threadTimerImplementation::getTimeout(){
 }
 
 int threadTimerImplementation::killTimerThread(){
-    threadRunning = false;
-    return pthread_cancel(timerThread);
+    int ans = !(pthread_cancel(timerThread));
+    return ans;
+}
+int threadTimerImplementation::stopThread(){
+    pthread_mutex_lock(&runningMtx);
+    bool temp = threadRunning;
+    pthread_mutex_unlock(&runningMtx);
+    if (temp){
+        bool ans = killTimerThread();
+        pthread_join(timerThread, NULL);
+        pthread_mutex_lock(&runningMtx);
+        threadRunning = false;
+        pthread_mutex_unlock(&runningMtx);
+        return ans;
+    }
+    else
+        return 1;
 }
 
 void threadTimerImplementation::resetTimer(){
-    killTimerThread();
-    pthread_join(timerThread, NULL);
-    pthread_mutex_lock(&timerMutex);
+    stopThread();
+    pthread_mutex_lock(&timerMtx);
     timeout = false;
-    pthread_mutex_unlock(&timerMutex);
+    pthread_mutex_unlock(&timerMtx);
     startTimerThread();
     return;
 }
 
 int threadTimerImplementation::isThreadRunning(){
-    return (int)threadRunning;
+    pthread_mutex_lock(&runningMtx);
+    int temp = (int)threadRunning;
+    pthread_mutex_unlock(&runningMtx);
+    return temp;
 }
 
 double threadTimerImplementation::getTime(){
-    return startTime() + get_wall_time();
+    pthread_mutex_lock(&startTimeMtx);
+    double ans = get_wall_time() - startTime;
+    pthread_mutex_unlock(&startTimeMtx);
+    return ans;
 }
 

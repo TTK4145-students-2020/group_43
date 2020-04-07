@@ -109,13 +109,13 @@ thr_udpListen(void * arg){
   setsockopt(threadListItem->socket,SOL_SOCKET,SO_REUSEADDR, &optval, sizeof(optval));
 
   int res = bind(threadListItem->socket,(struct sockaddr *) &si_me, sizeof(si_me));
-  if(res == -1) error("thr_udpListen:bind");
+  if(res == -1) error( (char*) "thr_udpListen:bind");
 
   if(m_log) printf("Sverresnetwork: udpListen: Binding to port %d\n",threadListItem->port);
 
   while(1){
     res = recvfrom(threadListItem->socket, buf, BUFLEN, 0,(struct sockaddr *) &si_other, &slen);
-    if(res == -1) error("thr_udpListen:recvfrom");
+    if(res == -1) error( (char*) "thr_udpListen:recvfrom");
     if(res >= BUFLEN-1){
       fprintf(stderr,"recvfrom: Hmm, length of received message is larger than max message length: %d vs %d\n\n",res,BUFLEN);      
       assert(res < BUFLEN-1);
@@ -140,7 +140,7 @@ void udp_startReceiving(int port,TMessageCallback callBack){
   listeningThreads[nOfListeningThreads]->callBack = callBack;
 
   int res = pthread_create(&(listeningThreads[nOfListeningThreads]->thread), NULL, thr_udpListen, listeningThreads[nOfListeningThreads]);
-  if(res != 0) error("pthread_create failed");
+  if(res != 0) error( (char*) "pthread_create failed");
 
   nOfListeningThreads++;
 }
@@ -152,16 +152,16 @@ udp_send(char * address,int port,char * data, int dataLength){
   int s, slen=sizeof(si_other);
 
   if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
-    error("udp_send: socket");
+    error( (char*) "udp_send: socket");
 
   memset((char *) &si_other, 0, sizeof(si_other));
   si_other.sin_family = AF_INET;
   si_other.sin_port = htons(port);
   int res = inet_aton(address, &si_other.sin_addr);
-  if(res==0) error("inet_aton() failed\n");
+  if(res==0) error( (char*) "inet_aton() failed\n");
 
   res = sendto(s, data, dataLength, 0, (struct sockaddr *) &si_other, slen);
-  if(res==-1)  error("udp_send: sendto()");
+  if(res==-1)  error( (char*) "udp_send: sendto()");
 
   close(s);
 }
@@ -173,7 +173,7 @@ udp_broadcast(int port,char * data, int dataLength){
   int s, slen=sizeof(si_other);
 
   if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
-    error("udp_send: socket");
+    error( (char*) "udp_send: socket");
 
   int optval = 1;
   setsockopt(s,SOL_SOCKET,SO_BROADCAST, &optval, sizeof(optval));
@@ -187,7 +187,7 @@ udp_broadcast(int port,char * data, int dataLength){
   }
 
   int res = sendto(s, data, dataLength, 0, (struct sockaddr *) &si_other, slen);
-  if(res==-1)  error("udp_broadcast: sendto()");
+  if(res==-1)  error( (char*) "udp_broadcast: sendto()");
 
   close(s);
 }
@@ -238,7 +238,7 @@ conn_add(char * ip,int s){
   int i;
 
   if(conn_lookup(ip))
-    error("conn_add: Trying to add an already existing connection");
+    error( (char*) "conn_add: Trying to add an already existing connection");
 
   for(i=0;i<MAXTCPCONNECTIONS;i++){
     if(tcpConnections[i].socket == 0){
@@ -247,7 +247,7 @@ conn_add(char * ip,int s){
       return;
     }
   }
-  error("conn_add: No free connection slots?");
+  error( (char*) "conn_add: No free connection slots?");
 }
 
 void
@@ -297,7 +297,7 @@ thr_tcpConnectionListen(void * parameter){
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd < 0) 
-     error("ERROR opening socket");
+     error( (char*) "ERROR opening socket");
 
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
@@ -308,7 +308,7 @@ thr_tcpConnectionListen(void * parameter){
   setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR, &optval, sizeof(optval));
 
   if(bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-    error("ERROR on binding");
+    error( (char*) "ERROR on binding");
 
   listen(sockfd,5);
 
@@ -318,7 +318,7 @@ thr_tcpConnectionListen(void * parameter){
   while(1){
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if(newsockfd < 0) 
-      error("ERROR on accept");
+      error( (char*) "ERROR on accept");
 
     // Now: Have the connection! 
     char * newConnectionIp = strdup(inet_ntoa(cli_addr.sin_addr));
@@ -333,7 +333,7 @@ thr_tcpConnectionListen(void * parameter){
     // And create the thread that will receive the messages.
     long lfd = newsockfd;
     int res = pthread_create(&thread, NULL, thr_tcpMessageListen,(void *) lfd);
-    if(res != 0) error("pthread_create failed");
+    if(res != 0) error( (char*) "pthread_create failed");
   }
 
 }
@@ -353,7 +353,7 @@ tcp_startConnectionListening(int port){
 
   long lfd = port;
   int res = pthread_create(&thread, NULL, thr_tcpConnectionListen,(void *) lfd);
-  if(res != 0) error("pthread_create failed");
+  if(res != 0) error( (char*) "pthread_create failed");
 }
 
 
@@ -364,17 +364,17 @@ tcp_openConnection(char * ip,int port){
 
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if(sockfd < 0) 
-    error("ERROR opening socket");
+    error( (char*) "ERROR opening socket");
 
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   int res = inet_aton(ip, &serv_addr.sin_addr);
-  if(res==0) error("inet_aton() failed\n");
+  if(res==0) error( (char*) "inet_aton() failed\n");
   serv_addr.sin_port = htons(port);
 
   res = connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr));
   if(res < 0){
-    // error("ERROR connecting");
+    // error( (char*) "ERROR connecting");
     if(m_log) fprintf(stderr,"WARNING: sverresnetwork: Tried to open connection to %s:%d but failed\n",ip,port);
     return;
   }
@@ -390,7 +390,7 @@ tcp_openConnection(char * ip,int port){
   long lfd = sockfd;
   pthread_t thread;
   res = pthread_create(&thread, NULL, thr_tcpMessageListen,(void *) lfd);
-  if(res != 0) error("pthread_create failed");
+  if(res != 0) error( (char*) "pthread_create failed");
 
 }
 
@@ -408,7 +408,7 @@ tcp_send(char * ip,char * data, int datalength){
   int res = write(socket,data,datalength);
   if(res != datalength){
     if(m_log) printf("SverresNetwork: Writing failed to %s:%d Got %d/%d Closing\n",ip,socket,res,datalength);
-//    error("write:");
+//    error( (char*) "write:");
     if(m_log) printf("SverresNetwork: Closed a connection to %s - socket %d\n",ip,socket);
     m_connectionCallback(ip,0);
     conn_remove(ip);

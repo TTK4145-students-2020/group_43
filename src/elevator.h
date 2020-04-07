@@ -25,6 +25,7 @@ typedef struct {
     int                     requests[N_FLOORS][N_BUTTONS];
     ElevatorBehaviour       behaviour;
     threadTimer             timer;
+    int                     id;
     struct {
         ClearRequestVariant clearRequestVariant;
         double              doorOpenDuration_s;

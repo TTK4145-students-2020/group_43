@@ -8,7 +8,7 @@
 
 #define TRAVEL_TIME 1
 
-int costFunc_timeToServeRequest(Elevator e_old, Button b, floor f){
+float costFunc_timeToServeRequest(Elevator e_old, Button b, int f){
     Elevator e = e_old;
     const double DOOR_OPEN_TIME = e.config.doorOpenDuration_s;
     e.requests[f][b] = 1;
@@ -20,7 +20,7 @@ int costFunc_timeToServeRequest(Elevator e_old, Button b, floor f){
         }
     }
 
-    int duration = 0;
+    float duration = 0;
     
     switch(e.behaviour){
     case EB_Idle:
@@ -38,16 +38,16 @@ int costFunc_timeToServeRequest(Elevator e_old, Button b, floor f){
     }
 
 
-    while(true){
+    while(1){
         if(requests_shouldStop(e)){
-            e = requests_clearAtCurrentFloor(e, ifEqual);
+            e = requests_clearAtCurrentFloor_sim(e, ifEqual);
             if(arrivedAtRequest){
                 return duration;
             }
             duration += DOOR_OPEN_TIME;
             e.dirn = requests_chooseDirection(e);
         }
-        e.floor += e.direction;
+        e.floor += e.dirn;
         duration += TRAVEL_TIME;
     }
 }

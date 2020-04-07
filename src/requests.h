@@ -10,4 +10,4 @@ int requests_shouldStop(Elevator e) __attribute__((pure));
 
 Elevator requests_clearAtCurrentFloor(Elevator e) __attribute__((pure));
 
-Elevator requests_clearAtCurrentFloor(Elevator e_old, void onClearedRequest(Button b, int floor))
+Elevator requests_clearAtCurrentFloor_sim(Elevator e_old, void onClearedRequest(Button b, int floor));

@@ -9,8 +9,7 @@
 #include "requests.h"
 #include "timer.h"
 
-#include "requestHandler.h" //new
-#include "Network.h" //new
+#include "globals.hpp"
 
 static Elevator             elevator;
 static ElevOutputDevice     outputDevice;
@@ -28,8 +27,15 @@ static void __attribute__((constructor)) fsm_init(){
         )
     )
 
-    for (int i = 0; i<N_ELEVATORS; i++) { //new
+    for (int i = 0; i<N_ELEVATORS-1; i++) { //new
         otherElevators[i] = elevator_uninitialized;
+        con_load("elevator.con",
+        con_val("doorOpenDuration_s", &otherElevators[i].config.doorOpenDuration_s, "%lf")
+        con_enum("clearRequestVariant", &otherElevators[i].clearRequestVariant,
+            con_match(CV_All)
+            con_match(CV_InDirn)
+        )
+    )
     }
     
     outputDevice = elevio_getOutputDevice();
@@ -39,20 +45,20 @@ static void __attribute__((constructor)) fsm_init(){
 inline int max ( int a, int b ) { return a > b ? a : b; } 
 
 //new, setLights for all hall and local cab. to replace old one
-static void setAllLights(Elevator es, Elevator otherEs[]){
+static void fsm_setAllLights(void){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             int lightValue = 0;
             if (btn != B_Cab) {
                 for (int i=0; i<N_ELEVATORS-1; i++) {
-                    lightValue = max(lightValue, otherEs[i].requests[floor][btn])
+                    lightValue = max(lightValue, otherElevators[i].requests[floor][btn])
                 }
             }
             outputDevice.requestButtonLight(floor, btn, max(lightValue, es.requests[floor][btn]);
         }
     }
 }
-
+/*
 static void setAllLights(Elevator es){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
@@ -60,7 +66,7 @@ static void setAllLights(Elevator es){
         }
     }
 }
-
+*/
 void fsm_onInitBetweenFloors(void){
     outputDevice.motorDirection(D_Down);
     elevator.dirn = D_Down;
@@ -100,7 +106,7 @@ void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
         
     }
     
-    setAllLights(elevator);
+    //setAllLights(elevator);
     
     printf("\nNew state:\n");
     elevator_print(elevator);
@@ -124,7 +130,7 @@ void fsm_onFloorArrival(int newFloor){
             outputDevice.doorLight(1);
             elevator = requests_clearAtCurrentFloor(elevator);
             timer_start(elevator.config.doorOpenDuration_s);
-            setAllLights(elevator);
+            //setAllLights(elevator);
             elevator.behaviour = EB_DoorOpen;
         }
         break;
@@ -167,57 +173,8 @@ void fsm_onDoorTimeout(void){
 
 /*---------------------------------newfiles---------------------------------*/
 
-//what to do when request taken (same as fsm_onRequestButtonPush)
-void fsm_onRequestToTake(int btn_floor, Button btn_type){
-    printf("\n\n%s(%d, %s)\n", __FUNCTION__, btn_floor, elevio_button_toString(btn_type));
-    elevator_print(elevator);
-    
-    switch(elevator.behaviour){
-        
-    case EB_DoorOpen:
-        if(elevator.floor == btn_floor){
-            timer_start(elevator.config.doorOpenDuration_s);
-        } else {
-            elevator.requests[btn_floor][btn_type] = 1;
-        }
-        break;
 
-    case EB_Moving:
-        elevator.requests[btn_floor][btn_type] = 1;
-        break;
-        
-    case EB_Idle:
-        if(elevator.floor == btn_floor){
-            outputDevice.doorLight(1);
-            timer_start(elevator.config.doorOpenDuration_s);
-            elevator.behaviour = EB_DoorOpen;
-        } else {
-            elevator.requests[btn_floor][btn_type] = 1;
-            elevator.dirn = requests_chooseDirection(elevator);
-            outputDevice.motorDirection(elevator.dirn);
-            elevator.behaviour = EB_Moving;
-        }
-        break;
-        
-    }
-    // broadcast new state
-    setAllLights(elevator, otherElevators);
-    
-    printf("\nNew state:\n");
-    elevator_print(elevator);
-}
-
-fsm_onRequestButtonPress(int btn_floor, Button btn_type) {
-    order_data_t newRequest = requestHandler_assignNewRequest(elevator, otherElevators, btn_floor, btn_type);
-    if(requestHandler_toTakeAssignedRequest(elevator, newRequest)) {
-        fsm_onRequestToTake(btn_floor, btn_type);
-    }
-    else {
-        network_broadcast_message(&newRequest);
-    }
-}
-
-fsm_updateOtherElevators(order_data_t newState, int id) {//or const char* ip
+void fsm_updateOtherElevators(order_data_t newState, int id) {
     //find out where elev with ip/id is stored locally
     int elevIndex = 0; 
     for(int i = 0; i<N_Elevators; i++){
@@ -231,7 +188,7 @@ fsm_updateOtherElevators(order_data_t newState, int id) {//or const char* ip
     otherElevators[elevIndex].dirn = newState.dirn;
     for(int f = 0; f<N_FLOORS; f++){
         for(int btn = 0; btn<N_BUTTONS; btn++){
-            otherElevators[elevIndex].requests[f][b] = newState.requests[f][b];
+            otherElevators[elevIndex].requests[f][b] = newState.requests[f][btn];
         }
     }
     otherElevators[elevIndex].behavior = newState.behavior;

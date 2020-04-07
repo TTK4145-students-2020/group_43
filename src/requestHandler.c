@@ -5,8 +5,7 @@
 #include "elevator_io_types.h"
 #include "elevator.h"
 #include "costFunc.h"
-//#include "Network.h"
-// #include order_timer____.h
+#include "globals.hpp"
 
 #include "requestHandler.h"
 
@@ -22,8 +21,8 @@ int requestHandler_toTakeAssignedRequest(Elevator elevator, order_data_t assigne
 order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherElevators[], int btn_floor, Button btn_type) {
 
     order_data_t newRequest;
-    newRequest.btn_floor = btn_floor;
-    newRequest.btn_type = btn_type;
+    newRequest.floor = btn_floor;
+    newRequest.button = btn_type;
     //newRequest.taken = -1;
 
     if (btn_type == B_Cab) {

@@ -17,6 +17,11 @@ typedef enum {
     EB_Moving
 } ElevatorBehaviour_t;
 
+typedef enum { 
+    D_Down  = -1,
+    D_Stop  = 0,
+    D_Up    = 1
+} Dirn;
 
 typedef struct 
 {
@@ -29,11 +34,7 @@ typedef struct
 {
 	uint8_t		id;
 	uint8_t		floor; //floor where the elevator actually is
-	#ifdef cpluplus
-	_Bool 		direction; //false = down, true = up
-	#else 
-	bool		direction;
-	#endif
+	Dirn 		direction; //false = down, true = up
 	int8_t		requests[N_FLOORS][N_BUTTONS]; //todo, check if it can be bools, and if it takes less bytes to have it as bool
 	ElevatorBehaviour_t 	behaviour; //from the fsm
 }elevator_data_t;

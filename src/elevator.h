@@ -1,6 +1,7 @@
 #pragma once
 
 #include "elevator_io_types.h"
+#include "threadTimer.hpp"
 
 typedef enum {
     EB_Idle,
@@ -23,7 +24,8 @@ typedef struct {
     Dirn                    dirn;
     int                     requests[N_FLOORS][N_BUTTONS];
     ElevatorBehaviour       behaviour;
-    
+    threadTimer             timer;
+    int                     id;
     struct {
         ClearRequestVariant clearRequestVariant;
         double              doorOpenDuration_s;

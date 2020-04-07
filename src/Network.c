@@ -13,7 +13,7 @@ message_t received_msg;
 char receivedMessage[SIZE_BUFFER_MESSAGES][NUMBER_MESSAGES][LENGHT_MESSAGE];
 //we want to be able to store all (NUMBER_MESSAGES) the messages (LENGHT_MESSAGE) sent by other elevators including possible errors(SIZE_BUFFER_MESSAGES)
 uint8_t numberOfMessagesReceived[SIZE_BUFFER_MESSAGES];
-order_timer* receiveMessageTimer[SIZE_BUFFER_MESSAGES];
+threadTimer* receiveMessageTimer[SIZE_BUFFER_MESSAGES];
 uint8_t probaRandomError;
 
 
@@ -54,7 +54,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
 			if(numberOfMessagesReceived[position] == 0)
 			{//this place is free
 				positionFound = 1;
-				//receiveMessageTimer[position].start();//TODO: uncomment Start timer (we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
+				receiveMessageTimer[position]->start();//TODO: uncomment Start timer (we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
 				break;
 			}
 		}
@@ -76,7 +76,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	{//We received NUMBER_MESSAGES times the same message, no error!
 		network_forwardMessage(receivedMessage[position][0]);
 		network_freeBufferReceivedMessage(position);
-		//delete/stop timer
+		receiveMessageTimer[position]->stop();
 	}    
 }
 
@@ -93,7 +93,7 @@ void network_init(uint8_t probaErr)
 	memset(numberOfMessagesReceived,0,sizeof(numberOfMessagesReceived));
 	
 	for (uint8_t i = 0; i < SIZE_BUFFER_MESSAGES ; i++)
-		receiveMessageTimer[i] = new order_timer(&received_msg.data.order,TIMEOUT_RECEIVE_MESSAGE);
+		receiveMessageTimer[i] = new threadTimer(TIMEOUT_RECEIVE_MESSAGE);
 	printf("Init the network ... DONE\n\n");
 }
 
@@ -155,9 +155,9 @@ void network_checkAndRecoverTimesOut()
 {
 	for(uint8_t pos = 0; pos< SIZE_BUFFER_MESSAGES; pos++)
 	{
-		if (receiveMessageTimer[pos]) //->isAlive()) //TODO: uncomment this when implemented in timer.h
+		if (receiveMessageTimer[pos]->isAlive()) //TODO: uncomment this when implemented in timer.h
 		{
-			if(receiveMessageTimer[pos]->is_timed_out())
+			if(receiveMessageTimer[pos]->isTimedOut())
 			{
 				printf("Time out for message at position %d. Checking if we ca extract data\n",pos);
 				if (numberOfMessagesReceived[pos]>= NUMBER_MESSAGES/2+1) //we need more than half the messages to correct
@@ -165,7 +165,7 @@ void network_checkAndRecoverTimesOut()
 					printf("we could save the message\n");
 					network_forwardMessage(receivedMessage[pos][0]);
 				}
-				receiveMessageTimer[pos]->stop_timer();
+				receiveMessageTimer[pos]->stop();
 			}		
 		}
 	}

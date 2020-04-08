@@ -35,6 +35,6 @@ typedef struct
 	uint8_t		id;
 	uint8_t		floor; //floor where the elevator actually is
 	Dirn 		direction; //false = down, true = up
-	int8_t		requests[N_FLOORS][N_BUTTONS]; //todo, check if it can be bools, and if it takes less bytes to have it as bool
+	uint8_t		requests[N_FLOORS][N_BUTTONS]; //todo, do we want a bitfield to safe place?
 	ElevatorBehaviour_t 	behaviour; //from the fsm
 }elevator_data_t;

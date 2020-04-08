@@ -20,7 +20,7 @@ int main(int argc,char** argv)
 		probaRandomError = atoi(argv[2]);
 	}
 	printf("proba rand err = %u%%\n",probaRandomError);
-	printf("size of order = %lu vs uint8_t = %lu\n",sizeof(order_data_t),sizeof(uint8_t));
+	printf("size of elevator_data_t = %lu vs uint8_t = %lu\n",sizeof(elevator_data_t),sizeof(uint8_t));
     
 	#ifdef __cplusplus
 	printf("considering C++ code\n");

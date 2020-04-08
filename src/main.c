@@ -13,9 +13,27 @@
 #include "globals.hpp"
 
 
-int main(void){
+int main(int argc,char** argv){
     printf("Started!\n");
-    
+	
+	if(argc ==1)
+		printf("\nPlease add arguments: \n");
+		printf("First one is the elevator ID\n");
+		printf("Second one is the probability of error while sending a message\n\n");
+				
+	ID_ELEVATOR = 1;
+	uint8_t probaRandomError = 0;
+	if(argc>1)
+	{
+		ID_ELEVATOR = atoi(argv[1]);
+	}
+	if(argc>2)
+	{
+		probaRandomError = atoi(argv[2]);
+	}
+	
+    network_init(probaRandomError);
+	
     int inputPollRate_ms = 25;
     con_load("elevator.con",
         con_val("inputPollRate_ms", &inputPollRate_ms, "%d")

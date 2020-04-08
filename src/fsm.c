@@ -39,6 +39,7 @@ static void __attribute__((constructor)) fsm_init(){
     }
     
     outputDevice = elevio_getOutputDevice();
+	elevator.id = ID_ELEVATOR;
 }
 
 //new, a max function, apparently not defiend i c as i could find...

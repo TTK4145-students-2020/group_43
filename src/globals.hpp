@@ -24,9 +24,9 @@ typedef enum {
 } Dirn;
 
 typedef enum { 
-    B_HallUp,
-    B_HallDown,
-    B_Cab
+    B_HallUp	= 0,
+    B_HallDown	= 1,
+    B_Cab		=2
 } Button;
 
 typedef struct 

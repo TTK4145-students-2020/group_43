@@ -43,21 +43,21 @@ void elevator_hardware_init() {
 
 
 
-void elevator_hardware_set_motor_direction(elevator_hardware_motor_direction_t dirn) {
+void elevator_hardware_set_motor_direction(Dirn dirn) {
     pthread_mutex_lock(&sockmtx);
-    send(sockfd, (char[4]) {1, dirn}, 4, 0);
+    send(sockfd, (char[4]) {1, (char)dirn}, 4, 0);
     pthread_mutex_unlock(&sockmtx);
 }
 
 
-void elevator_hardware_set_button_lamp(elevator_hardware_button_type_t button, int floor, int value) {
+void elevator_hardware_set_button_lamp(Button button, int floor, int value) {
     assert(floor >= 0);
     assert(floor < N_FLOORS);
     assert(button >= 0);
     assert(button < N_BUTTONS);
 
     pthread_mutex_lock(&sockmtx);
-    send(sockfd, (char[4]) {2, button, floor, value}, 4, 0);
+    send(sockfd, (char[4]) {2, (char)button, (char)floor, (char)value}, 4, 0);
     pthread_mutex_unlock(&sockmtx);
 }
 
@@ -67,30 +67,30 @@ void elevator_hardware_set_floor_indicator(int floor) {
     assert(floor < N_FLOORS);
 
     pthread_mutex_lock(&sockmtx);
-    send(sockfd, (char[4]) {3, floor}, 4, 0);
+    send(sockfd, (char[4]) {3, (char)floor}, 4, 0);
     pthread_mutex_unlock(&sockmtx);
 }
 
 
 void elevator_hardware_set_door_open_lamp(int value) {
     pthread_mutex_lock(&sockmtx);
-    send(sockfd, (char[4]) {4, value}, 4, 0);
+    send(sockfd, (char[4]) {4, (char)value}, 4, 0);
     pthread_mutex_unlock(&sockmtx);
 }
 
 
 void elevator_hardware_set_stop_lamp(int value) {
     pthread_mutex_lock(&sockmtx);
-    send(sockfd, (char[4]) {5, value}, 4, 0);
+    send(sockfd, (char[4]) {5, (char)value}, 4, 0);
     pthread_mutex_unlock(&sockmtx);
 }
 
 
 
 
-int elevator_hardware_get_button_signal(elevator_hardware_button_type_t button, int floor) {
+int elevator_hardware_get_button_signal(Button button, int floor) {
     pthread_mutex_lock(&sockmtx);
-    send(sockfd, (char[4]) {6, button, floor}, 4, 0);
+    send(sockfd, (char[4]) {6, (char)button, (char)floor}, 4, 0);
     char buf[4];
     recv(sockfd, buf, 4, 0);
     pthread_mutex_unlock(&sockmtx);

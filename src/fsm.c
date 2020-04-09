@@ -14,7 +14,7 @@
 static Elevator             elevator;
 static ElevOutputDevice     outputDevice;
 
-static Elevator             otherElevators[N_ELEVATORS-1]; //new
+static Elevator             otherElevators[NUMBER_ELEVATOR-1]; //new
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();
@@ -27,11 +27,11 @@ static void __attribute__((constructor)) fsm_init(){
         )
     )
 
-    for (int i = 0; i<N_ELEVATORS-1; i++) { //new
-        otherElevators[i] = elevator_uninitialized;
+    for (int i = 0; i<NUMBER_ELEVATOR-1; i++) { //new
+        otherElevators[i] = elevator_uninitialized();
         con_load("elevator.con",
         con_val("doorOpenDuration_s", &otherElevators[i].config.doorOpenDuration_s, "%lf")
-        con_enum("clearRequestVariant", &otherElevators[i].clearRequestVariant,
+        con_enum("clearRequestVariant", &otherElevators[i].config.clearRequestVariant,
             con_match(CV_All)
             con_match(CV_InDirn)
         )
@@ -51,11 +51,11 @@ static void fsm_setAllLights(void){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             int lightValue = 0;
             if (btn != B_Cab) {
-                for (int i=0; i<N_ELEVATORS-1; i++) {
+                for (int i=0; i<NUMBER_ELEVATOR-1; i++) {
                     lightValue = max(lightValue, otherElevators[i].requests[floor][btn])
                 }
             }
-            outputDevice.requestButtonLight(floor, btn, max(lightValue, es.requests[floor][btn]);
+            outputDevice.requestButtonLight(floor, Button(btn), max(lightValue, elevator.data.requests[floor][btn]));
         }
     }
 }
@@ -175,10 +175,10 @@ void fsm_onDoorTimeout(void){
 /*---------------------------------newfiles---------------------------------*/
 
 
-void fsm_updateOtherElevators(order_data_t newState, int id) {
+void fsm_updateOtherElevators(elevator_data_t newState) {
     //find out where elev with ip/id is stored locally
     int elevIndex = 0; 
-    for(int i = 0; i<N_Elevators; i++){
+    for(int i = 0; i<NUMBER_ELEVATOR; i++){
         if(otherElevators[i].id == id) {
             elevIndex = i;
             break;

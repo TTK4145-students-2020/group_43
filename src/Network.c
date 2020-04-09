@@ -180,7 +180,7 @@ void network_forwardMessage(char* msg)
 			order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ELEVATOR_MESSAGE:
-			order_update_elevator(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
+			fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ASK_RECOVER:
 			printf("\nask for recovery\n\n");

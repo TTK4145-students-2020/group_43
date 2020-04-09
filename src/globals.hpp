@@ -23,18 +23,24 @@ typedef enum {
     D_Up    = 1
 } Dirn;
 
+typedef enum { 
+    B_HallUp,
+    B_HallDown,
+    B_Cab
+} Button;
+
 typedef struct 
 {
-    uint8_t     floor;
-	uint8_t 	button; //-1 for going down, 0 for inside button and 1 for going up
+    int8_t     floor;
+	Button 	button; //-1 for going down, 0 for inside button and 1 for going up
 	int8_t      owner; //who is taking the order? -1 if nobody
 }order_data_t;
 
 typedef struct
 {
-	uint8_t		id;
-	uint8_t		floor; //floor where the elevator actually is
-	Dirn 		direction; //false = down, true = up
+	int8_t		id;
+	int8_t		floor; //floor where the elevator actually is
+	Dirn 		dirn; //false = down, true = up
 	uint8_t		requests[N_FLOORS][N_BUTTONS]; //todo, do we want a bitfield to safe place?
 	ElevatorBehaviour_t 	behaviour; //from the fsm
 }elevator_data_t;

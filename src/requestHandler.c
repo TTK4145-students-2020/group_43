@@ -30,14 +30,14 @@ order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherEl
         return newRequest;
     }
 
-    float cost[N_ELEVATORS];
-    for (int i = 0; i<N_ELEVATORS; i++) {
+    float cost[NUMBER_ELEVATOR];
+    for (int i = 0; i<NUMBER_ELEVATOR; i++) {
         cost[i] = INT_MAX;
     }
     cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
-    for (int i=1; i<N_ELEVATORS; i++) {
-        if (otherElevators[i].timer.timedOut()) {
+    for (int i=1; i<NUMBER_ELEVATOR; i++) {
+        if (otherElevators[i].timer.isTimedOut()) {
             cost[i] = costFunc_timeToServeRequest(otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;

@@ -1,19 +1,7 @@
-#pragma once
+#ifndef ELEVATOR_IO_TYPES_H
+#define ELEVATOR_IO_TYPES_H
 
-#define N_FLOORS 4
-#define N_BUTTONS 3
-
-typedef enum { 
-    D_Down  = -1,
-    D_Stop  = 0,
-    D_Up    = 1
-} Dirn;
-
-typedef enum { 
-    B_HallUp,
-    B_HallDown,
-    B_Cab
-} Button;
+#include "globals.hpp"
 
 
 typedef struct {
@@ -35,3 +23,4 @@ typedef struct {
 
 char* elevio_dirn_toString(Dirn d);
 char* elevio_button_toString(Button b);
+#endif //ELEVATOR_IO_TYPES_H

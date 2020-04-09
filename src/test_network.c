@@ -34,7 +34,7 @@ int main(int argc,char** argv)
     order_data_t order;
 	
     order.floor = 0;
-    order.button = 1;
+    order.button = B_HallUp;
     order.owner = -1;
     
 	elevator_data_t elevator;

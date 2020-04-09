@@ -2,7 +2,7 @@
 
 #include "elevator_io_types.h"
 #include "threadTimer.hpp"
-
+#include "globals.hpp"
 typedef enum {
     EB_Idle,
     EB_DoorOpen,

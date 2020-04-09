@@ -5,12 +5,12 @@
 
 #include "timer.h"
 
-char* eb_toString(ElevatorBehaviour eb){
-    return
+char* eb_toString(ElevatorBehaviour_t eb){
+    return (char*) (
         eb == EB_Idle       ? "EB_Idle"         :
         eb == EB_DoorOpen   ? "EB_DoorOpen"     :
         eb == EB_Moving     ? "EB_Moving"       :
-                              "EB_UNDEFINED"    ;
+                              "EB_UNDEFINED"   );
 }
 
 

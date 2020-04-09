@@ -7,9 +7,6 @@
 #define N_FLOORS 4
 #define N_BUTTONS 3
 
-//--------------NETWORK-----------
-#define COMPUTER_9_IP (char*) "10.100.23.223"
-
 static uint8_t ID_ELEVATOR;
 
 typedef enum {
@@ -58,6 +55,6 @@ typedef struct {
 	Dirn 		dirn; //false = down, true = up
 	uint8_t		requests[N_FLOORS][N_BUTTONS]; //todo, do we want a bitfield to safe place?
 	ElevatorBehaviour_t 	behaviour; //from the fsm
-	threadTimer*             timer;
+	threadTimer*            timer;
     config_t*	config;
 }elevator_data_t;

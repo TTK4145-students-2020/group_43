@@ -8,29 +8,12 @@
 
 #define TRAVEL_TIME 1
 
-<<<<<<< HEAD
-void ifEqual(Button inner_b, int inner_f);
-	
-float costFunc_timeToServeRequest(elevator_data_t e_old, Button b, int f){
-=======
 float costFunc_timeToServeRequest(elevator_data_t e_old, Button b, int f)
 {
->>>>>>> master
     elevator_data_t e = e_old;
     const double DOOR_OPEN_TIME = e.config->doorOpenDuration_s;
     e.requests[f][b] = 1;
 
-<<<<<<< HEAD
-    int arrivedAtRequest = 0;
-
-	void ifEqual(Button inner_b, int inner_f){
-        if(inner_b == b && inner_f == f){
-            arrivedAtRequest = 1;
-        }
-    }
-
-=======
->>>>>>> master
     float duration = 0;
 
     switch (e.behaviour)

@@ -1,6 +1,6 @@
 #include "requests.h"
 
-static int requests_above(Elevator e){
+static int requests_above(elevator_data_t e){
     for(int f = e.floor+1; f < N_FLOORS; f++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             if(e.requests[f][btn]){
@@ -11,7 +11,7 @@ static int requests_above(Elevator e){
     return 0;
 }
 
-static int requests_below(Elevator e){
+static int requests_below(elevator_data_t e){
     for(int f = 0; f < e.floor; f++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             if(e.requests[f][btn]){
@@ -22,7 +22,7 @@ static int requests_below(Elevator e){
     return 0;
 }
 
-Dirn requests_chooseDirection(Elevator e){
+Dirn requests_chooseDirection(elevator_data_t e){
     switch(e.dirn){
     case D_Up:
         return  requests_above(e) ? D_Up    :
@@ -38,7 +38,7 @@ Dirn requests_chooseDirection(Elevator e){
     }
 }
 
-int requests_shouldStop(Elevator e){
+int requests_shouldStop(elevator_data_t e){
     switch(e.dirn){
     case D_Down:
         return
@@ -57,12 +57,11 @@ int requests_shouldStop(Elevator e){
 }
 
 
-Elevator requests_clearAtCurrentFloor(Elevator e){
-        
-    switch(e.config.clearRequestVariant){
+elevator_data_t requests_clearAtCurrentFloor(elevator_data_t e){
+    switch(e.config->clearRequestVariant){
     case CV_All:
-        for(Button btn = 0; btn < N_BUTTONS; btn++){
-            e.requests[e.floor][btn] = 0;
+        for(int8_t btn = 0; btn < N_BUTTONS; btn++){
+            e.requests[e.floor][Button(btn)] = 0;
         }
         break;
         

@@ -177,7 +177,7 @@ void network_forwardMessage(char* msg)
 	switch (received_msg.id)
 	{
 		case ID_ORDER_MESSAGE:
-			order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
+			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ELEVATOR_MESSAGE:
 			fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.

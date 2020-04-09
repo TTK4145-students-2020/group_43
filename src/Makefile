@@ -2,8 +2,8 @@ CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = test_network.c threadTimer.cpp threadTimerImplementation.cpp Network.c sverresnetwork.c requestHandler.c costFunc.c fsm.c elevator.c elevator_io_device.c driver/elevator_hardware.c
-SRC_network = test_network.c Network.c sverresnetwork.c requestHandler.c threadTimer.cpp threadTimerImplementation.cpp fsm.c
+SRC = main.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp requestHandler.c costFunc.c fsm.c elevator.c elevator_io_device.c driver/elevator_hardware.c requestHandler.c requests.c timer.c
+SRC_network = test_network.cpp Network.cpp sverresnetwork.cpp requestHandler.c threadTimer.cpp threadTimerImplementation.cpp fsm.c elevator.c
 TARGET =  elevator_project
 
 #SRC = $(patsubst ./%, %, $(shell find . -name '*.c'  ! -name '*test*'))
@@ -31,7 +31,7 @@ clean:
 rebuild:	clean all
 
 # does everything to tst the network
-network: test_network.c sverresnetwork.c Network.c
+network: $(SRC_network)
 	$(CC) $(SRC_network) -o $@ $(LDFLAGS)
 	
 # does everything to tst the requestHandler

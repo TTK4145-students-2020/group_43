@@ -1,6 +1,6 @@
 #pragma once
 
-#include "globals.hpp" // might delete when merging
+//#include "globals.hpp" // might delete when merging
 #include "threadTimerImplementation.hpp"
 
 /*  Timing functionallity. ( by using threads. )*/

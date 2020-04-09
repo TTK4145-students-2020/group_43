@@ -13,7 +13,6 @@
 
 static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
-
 static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1]; //new
 
 static void __attribute__((constructor)) fsm_init(){

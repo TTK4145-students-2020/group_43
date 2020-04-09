@@ -9,9 +9,12 @@
 #include "requests.h"
 #include "timer.h"
 
+#include "globals.hpp"
+
 static Elevator             elevator;
 static ElevOutputDevice     outputDevice;
 
+static Elevator             otherElevators[N_ELEVATORS-1]; //new
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();
@@ -23,10 +26,40 @@ static void __attribute__((constructor)) fsm_init(){
             con_match(CV_InDirn)
         )
     )
+
+    for (int i = 0; i<N_ELEVATORS-1; i++) { //new
+        otherElevators[i] = elevator_uninitialized;
+        con_load("elevator.con",
+        con_val("doorOpenDuration_s", &otherElevators[i].config.doorOpenDuration_s, "%lf")
+        con_enum("clearRequestVariant", &otherElevators[i].clearRequestVariant,
+            con_match(CV_All)
+            con_match(CV_InDirn)
+        )
+    )
+    }
     
     outputDevice = elevio_getOutputDevice();
+	elevator.id = ID_ELEVATOR;
 }
 
+//new, a max function, apparently not defiend i c as i could find...
+inline int max ( int a, int b ) { return a > b ? a : b; } 
+
+//new, setLights for all hall and local cab. to replace old one
+static void fsm_setAllLights(void){
+    for(int floor = 0; floor < N_FLOORS; floor++){
+        for(int btn = 0; btn < N_BUTTONS; btn++){
+            int lightValue = 0;
+            if (btn != B_Cab) {
+                for (int i=0; i<N_ELEVATORS-1; i++) {
+                    lightValue = max(lightValue, otherElevators[i].requests[floor][btn])
+                }
+            }
+            outputDevice.requestButtonLight(floor, btn, max(lightValue, es.requests[floor][btn]);
+        }
+    }
+}
+/*
 static void setAllLights(Elevator es){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
@@ -34,7 +67,7 @@ static void setAllLights(Elevator es){
         }
     }
 }
-
+*/
 void fsm_onInitBetweenFloors(void){
     outputDevice.motorDirection(D_Down);
     elevator.dirn = D_Down;
@@ -74,7 +107,7 @@ void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
         
     }
     
-    setAllLights(elevator);
+    //setAllLights(elevator);
     
     printf("\nNew state:\n");
     elevator_print(elevator);
@@ -98,7 +131,7 @@ void fsm_onFloorArrival(int newFloor){
             outputDevice.doorLight(1);
             elevator = requests_clearAtCurrentFloor(elevator);
             timer_start(elevator.config.doorOpenDuration_s);
-            setAllLights(elevator);
+            //setAllLights(elevator);
             elevator.behaviour = EB_DoorOpen;
         }
         break;
@@ -139,10 +172,30 @@ void fsm_onDoorTimeout(void){
     elevator_print(elevator);
 }
 
+/*---------------------------------newfiles---------------------------------*/
 
 
+void fsm_updateOtherElevators(order_data_t newState, int id) {
+    //find out where elev with ip/id is stored locally
+    int elevIndex = 0; 
+    for(int i = 0; i<N_Elevators; i++){
+        if(otherElevators[i].id == id) {
+            elevIndex = i;
+            break;
+        }
+    }
+    //syntax to be changed based on how order_data_t is changed, could probabily be done simpler 
+    otherElevators[elevIndex].floor = newState.floor;
+    otherElevators[elevIndex].dirn = newState.dirn;
+    for(int f = 0; f<N_FLOORS; f++){
+        for(int btn = 0; btn<N_BUTTONS; btn++){
+            otherElevators[elevIndex].requests[f][b] = newState.requests[f][btn];
+        }
+    }
+    otherElevators[elevIndex].behavior = newState.behavior;
+    otherElevators[elevIndex].timer.resetTimer();
 
-
+}
 
 
 

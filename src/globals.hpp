@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "threadTimer.hpp"
 
 #define NUMBER_ELEVATOR 3
 #define N_FLOORS 4
@@ -10,6 +11,21 @@
 #define COMPUTER_9_IP (char*) "10.100.23.223"
 
 static uint8_t ID_ELEVATOR;
+
+typedef enum {
+    // Assume everyone waiting for the elevator gets on the elevator, even if 
+    // they will be traveling in the "wrong" direction for a while
+    CV_All,
+    
+    // Assume that only those that want to travel in the current direction 
+    // enter the elevator, and keep waiting outside otherwise
+    CV_InDirn,
+} ClearRequestVariant;
+
+typedef struct {
+        ClearRequestVariant clearRequestVariant;
+        double   			doorOpenDuration_s;
+} config_t; 
 
 typedef enum {
     EB_Idle,
@@ -36,11 +52,12 @@ typedef struct
 	int8_t      owner; //who is taking the order? -1 if nobody
 }order_data_t;
 
-typedef struct
-{
+typedef struct {
 	int8_t		id;
 	int8_t		floor; //floor where the elevator actually is
 	Dirn 		dirn; //false = down, true = up
 	uint8_t		requests[N_FLOORS][N_BUTTONS]; //todo, do we want a bitfield to safe place?
 	ElevatorBehaviour_t 	behaviour; //from the fsm
+	threadTimer*             timer;
+    config_t*	config;
 }elevator_data_t;

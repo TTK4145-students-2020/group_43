@@ -15,7 +15,7 @@ char* eb_toString(ElevatorBehaviour_t eb){
 
 
 
-void elevator_print(Elevator es){
+void elevator_print(elevator_data_t es){
     printf("  +--------------------+\n");
     printf(
         "  |floor = %-2d          |\n"
@@ -43,12 +43,12 @@ void elevator_print(Elevator es){
     printf("  +--------------------+\n");
 }
 
-Elevator elevator_uninitialized(void){
-    return (Elevator){
+elevator_data_t elevator_uninitialized(void){
+    return (elevator_data_t){
         .floor = -1,
         .dirn = D_Stop,
         .behaviour = EB_Idle,
-        .config = {
+        .config = new config_t {
             .clearRequestVariant = CV_All,
             .doorOpenDuration_s = 3.0,
         },

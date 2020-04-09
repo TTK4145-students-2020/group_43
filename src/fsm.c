@@ -11,17 +11,17 @@
 
 #include "globals.hpp"
 
-static Elevator             elevator;
+static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
 
-static Elevator             otherElevators[NUMBER_ELEVATOR-1]; //new
+static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1]; //new
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();
     
     con_load("elevator.con",
-        con_val("doorOpenDuration_s", &elevator.config.doorOpenDuration_s, "%lf")
-        con_enum("clearRequestVariant", &elevator.config.clearRequestVariant,
+        con_val("doorOpenDuration_s", &elevator.config->doorOpenDuration_s, "%lf")
+        con_enum("clearRequestVariant", &elevator.config->clearRequestVariant,
             con_match(CV_All)
             con_match(CV_InDirn)
         )
@@ -30,8 +30,8 @@ static void __attribute__((constructor)) fsm_init(){
     for (int i = 0; i<NUMBER_ELEVATOR-1; i++) { //new
         otherElevators[i] = elevator_uninitialized();
         con_load("elevator.con",
-        con_val("doorOpenDuration_s", &otherElevators[i].config.doorOpenDuration_s, "%lf")
-        con_enum("clearRequestVariant", &otherElevators[i].config.clearRequestVariant,
+        con_val("doorOpenDuration_s", &otherElevators[i].config->doorOpenDuration_s, "%lf")
+        con_enum("clearRequestVariant", &otherElevators[i].config->clearRequestVariant,
             con_match(CV_All)
             con_match(CV_InDirn)
         )
@@ -52,10 +52,10 @@ static void fsm_setAllLights(void){
             int lightValue = 0;
             if (btn != B_Cab) {
                 for (int i=0; i<NUMBER_ELEVATOR-1; i++) {
-                    lightValue = max(lightValue, otherElevators[i].requests[floor][btn])
+                    lightValue = max(lightValue, otherElevators[i].requests[floor][btn]);
                 }
             }
-            outputDevice.requestButtonLight(floor, Button(btn), max(lightValue, elevator.data.requests[floor][btn]));
+            outputDevice.requestButtonLight(floor, Button(btn), max(lightValue, elevator.requests[floor][btn]));
         }
     }
 }
@@ -82,7 +82,7 @@ void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
         
     case EB_DoorOpen:
         if(elevator.floor == btn_floor){
-            timer_start(elevator.config.doorOpenDuration_s);
+            timer_start(elevator.config->doorOpenDuration_s);
         } else {
             elevator.requests[btn_floor][btn_type] = 1;
         }
@@ -95,7 +95,7 @@ void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
     case EB_Idle:
         if(elevator.floor == btn_floor){
             outputDevice.doorLight(1);
-            timer_start(elevator.config.doorOpenDuration_s);
+            timer_start(elevator.config->doorOpenDuration_s);
             elevator.behaviour = EB_DoorOpen;
         } else {
             elevator.requests[btn_floor][btn_type] = 1;
@@ -130,7 +130,7 @@ void fsm_onFloorArrival(int newFloor){
             outputDevice.motorDirection(D_Stop);
             outputDevice.doorLight(1);
             elevator = requests_clearAtCurrentFloor(elevator);
-            timer_start(elevator.config.doorOpenDuration_s);
+            timer_start(elevator.config->doorOpenDuration_s);
             //setAllLights(elevator);
             elevator.behaviour = EB_DoorOpen;
         }
@@ -179,7 +179,7 @@ void fsm_updateOtherElevators(elevator_data_t newState) {
     //find out where elev with ip/id is stored locally
     int elevIndex = 0; 
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
-        if(otherElevators[i].id == id) {
+        if(otherElevators[i].id == newState.id) {
             elevIndex = i;
             break;
         }
@@ -189,11 +189,11 @@ void fsm_updateOtherElevators(elevator_data_t newState) {
     otherElevators[elevIndex].dirn = newState.dirn;
     for(int f = 0; f<N_FLOORS; f++){
         for(int btn = 0; btn<N_BUTTONS; btn++){
-            otherElevators[elevIndex].requests[f][b] = newState.requests[f][btn];
+            otherElevators[elevIndex].requests[f][btn] = newState.requests[f][btn];
         }
     }
-    otherElevators[elevIndex].behavior = newState.behavior;
-    otherElevators[elevIndex].timer.resetTimer();
+    otherElevators[elevIndex].behaviour = newState.behaviour;
+    otherElevators[elevIndex].timer->start();
 
 }
 

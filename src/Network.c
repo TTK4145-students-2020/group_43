@@ -134,7 +134,7 @@ void network_askRecovery()
 {
 	message_t recoveryMsg;
 	recoveryMsg.id = ID_ASK_RECOVER;
-	recoveryMsg.data.recoveryId = ID_ELEVATOR;
+	recoveryMsg.data.IdToRecover = ID_ELEVATOR;
 	network_broadcastMessage(&recoveryMsg); //send message to the others to send their data over the network
 }
 

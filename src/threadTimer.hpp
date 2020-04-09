@@ -1,3 +1,5 @@
+#pragma once
+
 #include "globals.hpp" // might delete when merging
 #include "threadTimerImplementation.hpp"
 

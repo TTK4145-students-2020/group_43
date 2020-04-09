@@ -10,7 +10,7 @@
 #include "requestHandler.h"
 
 
-int requestHandler_toTakeAssignedRequest(Elevator elevator, order_data_t assignedRequest) {
+int requestHandler_toTakeAssignedRequest(elevator_data_t elevator, order_data_t assignedRequest) {
     if (assignedRequest.owner == elevator.id) {
         return 1;
     }
@@ -18,7 +18,7 @@ int requestHandler_toTakeAssignedRequest(Elevator elevator, order_data_t assigne
 }
 
 // returns an assigned request, where the id of the chosen elevator is included
-order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherElevators[], int btn_floor, Button btn_type) {
+order_data_t requestHandler_assignNewRequest(elevator_data_t elevator, elevator_data_t otherElevators[], int btn_floor, Button btn_type) {
 
     order_data_t newRequest;
     newRequest.floor = btn_floor;
@@ -37,7 +37,7 @@ order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherEl
     cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
-        if (otherElevators[i].timer.isTimedOut()) {
+        if (otherElevators[i].timer->isTimedOut()) {
             cost[i] = costFunc_timeToServeRequest(otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;

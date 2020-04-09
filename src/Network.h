@@ -34,7 +34,7 @@ typedef struct //this is the struct that is sent through the network
 	{
 		order_data_t	order;
 		elevator_data_t elevator;
-		uint8_t			recoveryId;
+		uint8_t			IdToRecover;
 	}data;
 }message_t;
 

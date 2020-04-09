@@ -8,9 +8,9 @@
 
 #define TRAVEL_TIME 1
 
-float costFunc_timeToServeRequest(Elevator e_old, Button b, int f){
-    Elevator e = e_old;
-    const double DOOR_OPEN_TIME = e.config.doorOpenDuration_s;
+float costFunc_timeToServeRequest(elevator_data_t e_old, Button b, int f){
+    elevator_data_t e = e_old;
+    const double DOOR_OPEN_TIME = e.config->doorOpenDuration_s;
     e.requests[f][b] = 1;
 
     int arrivedAtRequest = 0;

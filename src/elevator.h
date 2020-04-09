@@ -3,11 +3,6 @@
 #include "elevator_io_types.h"
 #include "threadTimer.hpp"
 #include "globals.hpp"
-typedef enum {
-    EB_Idle,
-    EB_DoorOpen,
-    EB_Moving
-} ElevatorBehaviour;
 
 typedef enum {
     // Assume everyone waiting for the elevator gets on the elevator, even if 
@@ -20,12 +15,8 @@ typedef enum {
 } ClearRequestVariant;
 
 typedef struct {
-    int                     floor;
-    Dirn                    dirn;
-    int                     requests[N_FLOORS][N_BUTTONS];
-    ElevatorBehaviour       behaviour;
-    threadTimer             timer;
-    int                     id;
+	elevator_data_t			data; 
+	threadTimer             timer;
     struct {
         ClearRequestVariant clearRequestVariant;
         double              doorOpenDuration_s;

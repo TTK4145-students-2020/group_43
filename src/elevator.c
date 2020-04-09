@@ -21,9 +21,9 @@ void elevator_print(Elevator es){
         "  |floor = %-2d          |\n"
         "  |dirn  = %-12.12s|\n"
         "  |behav = %-12.12s|\n",
-        es.data.floor,
-        elevio_dirn_toString(es.data.dirn),
-        eb_toString(es.data.behaviour)
+        es.floor,
+        elevio_dirn_toString(es.dirn),
+        eb_toString(es.behaviour)
     );
     printf("  +--------------------+\n");
     printf("  |  | up  | dn  | cab |\n");
@@ -35,7 +35,7 @@ void elevator_print(Elevator es){
             ){
                 printf("|     ");
             } else {
-                printf(es.data.requests[f][btn] ? "|  #  " : "|  -  ");
+                printf(es.requests[f][btn] ? "|  #  " : "|  -  ");
             }
         }
         printf("|\n");
@@ -45,9 +45,9 @@ void elevator_print(Elevator es){
 
 Elevator elevator_uninitialized(void){
     return (Elevator){
-        .data.floor = -1,
-        .data.dirn = D_Stop,
-        .data.behaviour = EB_Idle,
+        .floor = -1,
+        .dirn = D_Stop,
+        .behaviour = EB_Idle,
         .config = {
             .clearRequestVariant = CV_All,
             .doorOpenDuration_s = 3.0,

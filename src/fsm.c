@@ -39,7 +39,7 @@ static void __attribute__((constructor)) fsm_init(){
     }
     
     outputDevice = elevio_getOutputDevice();
-	elevator.data.id = ID_ELEVATOR;
+	elevator.id = ID_ELEVATOR;
 }
 
 //new, a max function, apparently not defiend i c as i could find...
@@ -52,7 +52,7 @@ static void fsm_setAllLights(void){
             int lightValue = 0;
             if (btn != B_Cab) {
                 for (int i=0; i<NUMBER_ELEVATOR-1; i++) {
-                    lightValue = max(lightValue, otherElevators[i].data.requests[floor][btn]);
+                    lightValue = max(lightValue, otherElevators[i].requests[floor][btn])
                 }
             }
             outputDevice.requestButtonLight(floor, Button(btn), max(lightValue, elevator.data.requests[floor][btn]));
@@ -70,38 +70,38 @@ static void setAllLights(Elevator es){
 */
 void fsm_onInitBetweenFloors(void){
     outputDevice.motorDirection(D_Down);
-    elevator.data.dirn = D_Down;
-    elevator.data.behaviour = EB_Moving;
+    elevator.dirn = D_Down;
+    elevator.behaviour = EB_Moving;
 }
 
 void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
     printf("\n\n%s(%d, %s)\n", __FUNCTION__, btn_floor, elevio_button_toString(btn_type));
     elevator_print(elevator);
     
-    switch(elevator.data.behaviour){
+    switch(elevator.behaviour){
         
     case EB_DoorOpen:
-        if(elevator.data.floor == btn_floor){
+        if(elevator.floor == btn_floor){
             timer_start(elevator.config.doorOpenDuration_s);
         } else {
-            elevator.data.requests[btn_floor][btn_type] = 1;
+            elevator.requests[btn_floor][btn_type] = 1;
         }
         break;
 
     case EB_Moving:
-        elevator.data.requests[btn_floor][btn_type] = 1;
+        elevator.requests[btn_floor][btn_type] = 1;
         break;
         
     case EB_Idle:
-        if(elevator.data.floor == btn_floor){
+        if(elevator.floor == btn_floor){
             outputDevice.doorLight(1);
             timer_start(elevator.config.doorOpenDuration_s);
-            elevator.data.behaviour = EB_DoorOpen;
+            elevator.behaviour = EB_DoorOpen;
         } else {
-            elevator.data.requests[btn_floor][btn_type] = 1;
-            elevator.data.dirn = requests_chooseDirection(elevator);
-            outputDevice.motorDirection(elevator.data.dirn);
-            elevator.data.behaviour = EB_Moving;
+            elevator.requests[btn_floor][btn_type] = 1;
+            elevator.dirn = requests_chooseDirection(elevator);
+            outputDevice.motorDirection(elevator.dirn);
+            elevator.behaviour = EB_Moving;
         }
         break;
         
@@ -120,11 +120,11 @@ void fsm_onFloorArrival(int newFloor){
     printf("\n\n%s(%d)\n", __FUNCTION__, newFloor);
     elevator_print(elevator);
     
-    elevator.data.floor = newFloor;
+    elevator.floor = newFloor;
     
-    outputDevice.floorIndicator(elevator.data.floor);
+    outputDevice.floorIndicator(elevator.floor);
     
-    switch(elevator.data.behaviour){
+    switch(elevator.behaviour){
     case EB_Moving:
         if(requests_shouldStop(elevator)){
             outputDevice.motorDirection(D_Stop);
@@ -132,7 +132,7 @@ void fsm_onFloorArrival(int newFloor){
             elevator = requests_clearAtCurrentFloor(elevator);
             timer_start(elevator.config.doorOpenDuration_s);
             //setAllLights(elevator);
-            elevator.data.behaviour = EB_DoorOpen;
+            elevator.behaviour = EB_DoorOpen;
         }
         break;
     default:
@@ -150,17 +150,17 @@ void fsm_onDoorTimeout(void){
     printf("\n\n%s()\n", __FUNCTION__);
     elevator_print(elevator);
     
-    switch(elevator.data.behaviour){
+    switch(elevator.behaviour){
     case EB_DoorOpen:
-        elevator.data.dirn = requests_chooseDirection(elevator);
+        elevator.dirn = requests_chooseDirection(elevator);
         
         outputDevice.doorLight(0);
-        outputDevice.motorDirection(elevator.data.dirn);
+        outputDevice.motorDirection(elevator.dirn);
         
-        if(elevator.data.dirn == D_Stop){
-            elevator.data.behaviour = EB_Idle;
+        if(elevator.dirn == D_Stop){
+            elevator.behaviour = EB_Idle;
         } else {
-            elevator.data.behaviour = EB_Moving;
+            elevator.behaviour = EB_Moving;
         }
         
         break;
@@ -179,13 +179,22 @@ void fsm_updateOtherElevators(elevator_data_t newState) {
     //find out where elev with ip/id is stored locally
     int elevIndex = 0; 
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
-        if(otherElevators[i].data.id == newState.id) {
+        if(otherElevators[i].id == id) {
             elevIndex = i;
             break;
         }
     }
     //syntax to be changed based on how order_data_t is changed, could probabily be done simpler 
-	memcpy(&otherElevators[elevIndex].data,&newState,sizeof(newState));
+    otherElevators[elevIndex].floor = newState.floor;
+    otherElevators[elevIndex].dirn = newState.dirn;
+    for(int f = 0; f<N_FLOORS; f++){
+        for(int btn = 0; btn<N_BUTTONS; btn++){
+            otherElevators[elevIndex].requests[f][b] = newState.requests[f][btn];
+        }
+    }
+    otherElevators[elevIndex].behavior = newState.behavior;
+    otherElevators[elevIndex].timer.resetTimer();
+
 }
 
 

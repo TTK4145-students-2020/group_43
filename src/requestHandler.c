@@ -11,7 +11,7 @@
 
 
 int requestHandler_toTakeAssignedRequest(Elevator elevator, order_data_t assignedRequest) {
-    if (assignedRequest.owner == elevator.id) {
+    if (assignedRequest.owner == elevator.data.id) {
         return 1;
     }
     return 0;
@@ -26,7 +26,7 @@ order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherEl
     //newRequest.taken = -1;
 
     if (btn_type == B_Cab) {
-        newRequest.owner = elevator.id;
+        newRequest.owner = elevator.data.id;
         return newRequest;
     }
 
@@ -45,10 +45,10 @@ order_data_t requestHandler_assignNewRequest(Elevator elevator, Elevator otherEl
         }
     }
     if (minCostIndex == 0) {
-        newRequest.owner = elevator.id;
+        newRequest.owner = elevator.data.id;
     }
     else {
-        newRequest.owner = otherElevators[minCostIndex-1].id;
+        newRequest.owner = otherElevators[minCostIndex-1].data.id;
     }
     return newRequest;
 }

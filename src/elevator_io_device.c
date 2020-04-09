@@ -49,20 +49,20 @@ ElevOutputDevice elevio_getOutputDevice(void){
 
 
 char* elevio_dirn_toString(Dirn d){
-    return
+    return (char*)(
         d == D_Up    ? "D_Up"         :
         d == D_Down  ? "D_Down"       :
         d == D_Stop  ? "D_Stop"       :
-                       "D_UNDEFINED"  ;
+                       "D_UNDEFINED" );
 }
 
 
 char* elevio_button_toString(Button b){
-    return
+    return (char*)(
         b == B_HallUp       ? "B_HallUp"        :
         b == B_HallDown     ? "B_HallDown"      :
         b == B_Cab          ? "B_Cab"           :
-                              "B_UNDEFINED"     ;
+                              "B_UNDEFINED"    );
 }
 
 

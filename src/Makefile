@@ -2,8 +2,8 @@ CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = main.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp requestHandler.c costFunc.c fsm.c elevator.c elevator_io_device.c driver/elevator_hardware.c requestHandler.c requests.c timer.c
-SRC_network = test_network.cpp Network.cpp sverresnetwork.cpp requestHandler.c threadTimer.cpp threadTimerImplementation.cpp fsm.c elevator.c
+SRC = main.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp requestHandler.c costFunc.c fsm.c elevator.c elevator_io_device.c driver/elevator_hardware.c requests.c timer.c
+SRC_network = test_network.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp Order_handler.c 
 TARGET =  elevator_project
 
 #SRC = $(patsubst ./%, %, $(shell find . -name '*.c'  ! -name '*test*'))

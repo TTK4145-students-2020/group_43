@@ -3,7 +3,6 @@
 void network_receive_message();
 void network_forwardMessage(char* msg);
 void network_broadcastMessage(message_t* order);
-void decodeMessage(char* msg,order_data_t* order); //TODO: may be removable
 void network_freeBufferReceivedMessage(uint8_t position);
 void network_checkAndRecoverTimesOut();
 uint8_t getOldestMessage();
@@ -47,14 +46,14 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	{
 		printf("//it is the first message with this ID that we receive\n");
 		//look for a free place to store the comming messages
-		//network_checkAndRecoverTimesOut(); //TODO: uncomment this
+		network_checkAndRecoverTimesOut();
 		for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
 		{
 			
 			if(numberOfMessagesReceived[position] == 0)
 			{//this place is free
 				positionFound = 1;
-				receiveMessageTimer[position]->start();//TODO: uncomment Start timer (we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
+				receiveMessageTimer[position]->start();//we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
 				break;
 			}
 		}
@@ -138,6 +137,28 @@ void network_askRecovery()
 	network_broadcastMessage(&recoveryMsg); //send message to the others to send their data over the network
 }
 
+void network_forwardMessage(char* msg)
+{
+	memcpy(&received_msg, msg, LENGHT_MESSAGE);
+	switch (received_msg.id)
+	{
+		case ID_ORDER_MESSAGE:
+			printf("received order for floor %d",(int) received_msg.data.order.floor);
+			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
+			break;
+		case ID_ELEVATOR_MESSAGE:
+			printf("received elevator state with floor %d",(int) received_msg.data.elevator.floor);
+			//fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
+			break;
+		case ID_ASK_RECOVER:
+			printf("\nask for recovery\n\n");
+			//network_broadcastMessage(requestHandler_getElevator(receivedMessage.recoveryId);				
+			break;
+		default:
+			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
+	}
+}
+
 void network_printRawMessage(char* msg, uint16_t size)
 {
 	for (uint16_t i = 0;i<size;i++)
@@ -155,39 +176,17 @@ void network_checkAndRecoverTimesOut()
 {
 	for(uint8_t pos = 0; pos< SIZE_BUFFER_MESSAGES; pos++)
 	{
-		if (receiveMessageTimer[pos]->isAlive()) //TODO: uncomment this when implemented in timer.h
+		if (receiveMessageTimer[pos]->isTimedOut())
 		{
-			if(receiveMessageTimer[pos]->isTimedOut())
+			printf("Time out for message at position %d. Checking if we ca extract data\n",pos);
+			if (numberOfMessagesReceived[pos]>= NUMBER_MESSAGES/2+1) //we need more than half the messages to correct
 			{
-				printf("Time out for message at position %d. Checking if we ca extract data\n",pos);
-				if (numberOfMessagesReceived[pos]>= NUMBER_MESSAGES/2+1) //we need more than half the messages to correct
-				{
-					printf("we could save the message\n");
-					network_forwardMessage(receivedMessage[pos][0]);
-				}
-				receiveMessageTimer[pos]->stop();
-			}		
+				printf("we could save the message\n");
+				network_forwardMessage(receivedMessage[pos][0]);
+				network_freeBufferReceivedMessage(pos);
+			}
+			receiveMessageTimer[pos]->stop();
 		}
-	}
-}
-
-void network_forwardMessage(char* msg)
-{
-	memcpy(&received_msg, msg, LENGHT_MESSAGE);
-	switch (received_msg.id)
-	{
-		case ID_ORDER_MESSAGE:
-			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
-			break;
-		case ID_ELEVATOR_MESSAGE:
-			fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
-			break;
-		case ID_ASK_RECOVER:
-			printf("\nask for recovery\n\n");
-			//network_broadcastMessage(requestHandler_getElevator(receivedMessage.recoveryId);				
-			break;
-		default:
-			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
 	}
 }
 

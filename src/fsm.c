@@ -29,16 +29,17 @@ static void __attribute__((constructor)) fsm_init(){
     for (int i = 0; i<NUMBER_ELEVATOR-1; i++) { //new
         otherElevators[i] = elevator_uninitialized();
         con_load("elevator.con",
-        con_val("doorOpenDuration_s", &otherElevators[i].config->doorOpenDuration_s, "%lf")
-        con_enum("clearRequestVariant", &otherElevators[i].config->clearRequestVariant,
-            con_match(CV_All)
-            con_match(CV_InDirn)
-        )
-    )
+			con_val("doorOpenDuration_s", &otherElevators[i].config->doorOpenDuration_s, "%lf")
+			con_enum("clearRequestVariant", &otherElevators[i].config->clearRequestVariant,
+				con_match(CV_All)
+				con_match(CV_InDirn)
+			)
+		)
     }
     
     outputDevice = elevio_getOutputDevice();
 	elevator.id = ID_ELEVATOR;
+	network_askRecovery();
 }
 
 //new, a max function, apparently not defiend i c as i could find...

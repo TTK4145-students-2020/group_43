@@ -27,10 +27,8 @@ void network_init(uint8_t probaErr)
 	srand (time(NULL));
 	probaRandomError = probaErr;
 	
-	memset(receivedMessage,0,sizeof(receivedMessage));
-	memset(numberOfMessagesReceived,0,sizeof(numberOfMessagesReceived));
-	
 	for (uint8_t i = 0; i < SIZE_BUFFER_MESSAGES ; i++)
+		network_freeBufferReceivedMessage(i);
 		receiveMessageTimer[i] = new threadTimer(TIMEOUT_RECEIVE_MESSAGE);
 	printf("Init the network ... DONE\n\n");
 }
@@ -66,7 +64,6 @@ void network_broadcastMessage(message_t* data)
 		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
 		usleep(1000); //wait 1ms between all the messages
 	}
-
 }
 
 void network_askRecovery()

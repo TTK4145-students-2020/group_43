@@ -1,12 +1,13 @@
 #include "Network.h"
 
-void network_receive_message();
-void network_forwardMessage(char* msg);
 void network_broadcastMessage(message_t* order);
+void network_receive_message(const char* ip, char* data, int datalength);
+void network_forwardMessage(char* msg);
 void network_freeBufferReceivedMessage(uint8_t position);
 void network_checkAndRecoverTimesOut();
 uint8_t getOldestMessage();
 void network_printRawMessage(char* msg, uint16_t size);
+
 
 message_t received_msg;
 char receivedMessage[SIZE_BUFFER_MESSAGES][NUMBER_MESSAGES][LENGHT_MESSAGE];
@@ -16,68 +17,6 @@ threadTimer* receiveMessageTimer[SIZE_BUFFER_MESSAGES];
 uint8_t probaRandomError;
 
 
-
-
-
-void network_receive_message(const char* ip, char* data, int datalength)
-{
-	//TODO: check that we don't receive our own message checking the IP Address.
-	if (datalength !=LENGHT_MESSAGE)
-	{
-		printf("Unknown message\n");
-		return;
-	}
-    printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
-    //network_printRawMessage(data,LENGHT_MESSAGE);
-	
-	uint8_t position;
-	uint8_t positionFound = 0;
-	
-	//check if we already received this message
-	for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
-	{
-		if(strcmp(receivedMessage[position][0],data) == 0) 
-		{//exit the for while saving the position
-			positionFound = 1;
-			break; //exits the for to keep the postion in memory
-		}
-	}
-	if (positionFound==0)
-	{
-		printf("//it is the first message with this ID that we receive\n");
-		//look for a free place to store the comming messages
-		network_checkAndRecoverTimesOut();
-		for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
-		{
-			
-			if(numberOfMessagesReceived[position] == 0)
-			{//this place is free
-				positionFound = 1;
-				receiveMessageTimer[position]->start();//we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
-				break;
-			}
-		}
-	}
-	if (positionFound ==0)
-	{
-		printf("\n/!\\ ERROR, we should have found a place to store the message at this point !!\n\n");
-		printf("We delete the oldest message\n");
-		position = getOldestMessage();
-		network_freeBufferReceivedMessage(position);
-	}
-	printf("we gonna store this message in position %d ; %u to analyse it\n",position,numberOfMessagesReceived[position]);
-	//now position is the place where we should store the data
-	
-	//add the message received to the group of the same messages	
-	memcpy(receivedMessage[position][numberOfMessagesReceived[position]], data, LENGHT_MESSAGE);
-	numberOfMessagesReceived[position]++;
-	if (numberOfMessagesReceived[position] == NUMBER_MESSAGES)
-	{//We received NUMBER_MESSAGES times the same message, no error!
-		network_forwardMessage(receivedMessage[position][0]);
-		network_freeBufferReceivedMessage(position);
-		receiveMessageTimer[position]->stop();
-	}    
-}
 
 void network_init(uint8_t probaErr)
 {	
@@ -125,16 +64,77 @@ void network_broadcastMessage(message_t* data)
 			printf("error in message %u\n",i);
 		}
 		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
+		usleep(1000); //wait 1ms between all the messages
 	}
 
 }
 
 void network_askRecovery()
-{
+{ //send message to the others to send their data over the network
 	message_t recoveryMsg;
 	recoveryMsg.id = ID_ASK_RECOVER;
 	recoveryMsg.data.IdToRecover = ID_ELEVATOR;
-	network_broadcastMessage(&recoveryMsg); //send message to the others to send their data over the network
+	network_broadcastMessage(&recoveryMsg);
+}
+
+void network_receive_message(const char* ip, char* data, int datalength)
+{
+	//TODO: check that we don't receive our own message checking the IP Address.
+	if (datalength !=LENGHT_MESSAGE)
+	{
+		printf("Unknown message\n");
+		return;
+	}
+    printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
+    //network_printRawMessage(data,LENGHT_MESSAGE);
+	
+	uint8_t position;
+	uint8_t positionFound = 0;
+	
+	//check if we already received this message
+	for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
+	{
+		if(strcmp(receivedMessage[position][0],data) == 0) 
+		{
+			positionFound = 1;
+			break;
+		}
+	}
+	if (positionFound==0)
+	{
+		printf("//it is the first message with this ID that we receive\n");
+		//look for a free place to store the comming messages
+		network_checkAndRecoverTimesOut();
+		for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
+		{
+			
+			if(numberOfMessagesReceived[position] == 0)
+			{//this place is free
+				positionFound = 1;
+				receiveMessageTimer[position]->start();//we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
+				break;
+			}
+		}
+	}
+	if (positionFound ==0)
+	{
+		printf("\n/!\\ ERROR, we should have found a place to store the message at this point !!\n\n");
+		printf("We delete the oldest message\n");
+		position = getOldestMessage();
+		network_freeBufferReceivedMessage(position);
+	}
+	printf("we store this message in position %d ; %u to analyse it\n",position,numberOfMessagesReceived[position]);
+	//now position is the place where we should store the data
+	
+	//add the message received to the group of the same messages	
+	memcpy(receivedMessage[position][numberOfMessagesReceived[position]], data, LENGHT_MESSAGE);
+	numberOfMessagesReceived[position]++;
+	if (numberOfMessagesReceived[position] == NUMBER_MESSAGES)
+	{//We received NUMBER_MESSAGES times the same message, no error!
+		network_forwardMessage(receivedMessage[position][0]);
+		network_freeBufferReceivedMessage(position);
+		receiveMessageTimer[position]->stop();
+	}    
 }
 
 void network_forwardMessage(char* msg)
@@ -157,12 +157,6 @@ void network_forwardMessage(char* msg)
 		default:
 			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
 	}
-}
-
-void network_printRawMessage(char* msg, uint16_t size)
-{
-	for (uint16_t i = 0;i<size;i++)
-		printf("%d ",(int)msg[i]);
 }
 
 void network_freeBufferReceivedMessage(uint8_t position)
@@ -203,4 +197,10 @@ uint8_t getOldestMessage()
 		}
 	}
 	return indexMsgToDelete;
+}
+
+void network_printRawMessage(char* msg, uint16_t size)
+{
+	for (uint16_t i = 0;i<size;i++)
+		printf("%d ",(int)msg[i]);
 }

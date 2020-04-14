@@ -13,7 +13,7 @@ void fsm_onDoorTimeout(void);
 static void fsm_setAllLights(void);
 
 //void fsm_updateOtherElevators(elevator_data_t newState);
-elevator_data_t fsm_getElevator();
+elevator_data_t* fsm_getElevator();
 void fsm_initFromBackup(elevator_data_t elevBackup);
 
 #endif // FSM_H

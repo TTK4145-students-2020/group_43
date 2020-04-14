@@ -26,6 +26,14 @@ static void __attribute__((constructor)) requestHandler_init(){
     
 }
 
+elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
+    for(int i = 0; i<NUMBER_ELEVATOR; i++){
+        if(otherElevators[i].id == newElevState.id) {
+            return otherElevators[i];
+        }
+    }
+}
+
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     //find out where elev with ip/id is stored locally
     int elevIndex = 0; 
@@ -63,7 +71,6 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t elevator, int btn_f
     order_data_t newRequest;
     newRequest.floor = btn_floor;
     newRequest.button = btn_type;
-    //newRequest.taken = -1;
 
     if (btn_type == B_Cab) {
         newRequest.owner = elevator.id;

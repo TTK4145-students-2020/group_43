@@ -172,7 +172,7 @@ void fsm_onDoorTimeout(void){
     elevator_print(elevator);
 }
 
-elevator_data_t fsm_getElevator() {
+elevator_data_t* fsm_getElevator() {
     return elevator;
 }
 

@@ -51,17 +51,17 @@ int main(int argc,char** argv){
             static int prev[N_FLOORS][N_BUTTONS];
             for(int f = 0; f < N_FLOORS; f++){
                 for(int b = 0; b < N_BUTTONS; b++){
-                    int v = input.requestButton(f, b);
+                    int v = input.requestButton(f, static_cast<Button>(b));
                     if(v  &&  v != prev[f][b]){
 						//here was my point with doing this in fsm
-						order_data_t newRequest = requestHandler_assignNewRequest(fsm_getElevator(),f,b); 
+						order_data_t newRequest = requestHandler_assignNewRequest(*fsm_getElevator(),f,static_cast<Button>(b)); 
 						if(requestHandler_toTakeAssignedRequest(newRequest)) {
-							fsm_onRequestButtonPress(f, b);
+							fsm_onRequestButtonPress(f, static_cast<Button>(b));
 							network_broadcast(fsm_getElevator());
 							//fsm_setAllLights();
 						}
 						else {
-							network_broadcast(fsm_getElevator());
+							network_broadcast(&newRequest);
 						}   
                     }
                     prev[f][b] = v;
@@ -83,7 +83,7 @@ int main(int argc,char** argv){
         
         { // Timer
             if(timer_timedOut()){
-                //fsm_onDoorTimeout();
+                fsm_onDoorTimeout();
                 timer_stop();
 				network_broadcast(fsm_getElevator());
             }

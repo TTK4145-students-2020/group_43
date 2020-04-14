@@ -31,8 +31,10 @@ void network_init(uint8_t probaErr)
 	probaRandomError = probaErr;
 	
 	for (uint8_t i = 0; i < SIZE_BUFFER_MESSAGES ; i++)
+	{
 		network_freeBufferReceivedMessage(i);
 		receiveMessageTimer[i] = new threadTimer(TIMEOUT_RECEIVE_MESSAGE);
+	}
 	printf("Init the network ... DONE\n\n");
 }
 

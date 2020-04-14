@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "con_load.h"
 #include "elevator_io_types.h"
 #include "elevator.h"
 #include "costFunc.h"
@@ -26,9 +27,9 @@ static void __attribute__((constructor)) requestHandler_init(){
     
 }
 
-elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
+elevator_data_t requestHandler_getElevatorBackup(int elevId) {
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
-        if(otherElevators[i].id == newElevState.id) {
+        if(otherElevators[i].id == elevId) {
             return otherElevators[i];
         }
     }
@@ -67,7 +68,8 @@ int requestHandler_toTakeAssignedRequest(order_data_t assignedRequest) {
 
 // returns an assigned request, where the id of the chosen elevator is included
 order_data_t requestHandler_assignNewRequest(elevator_data_t elevator, int btn_floor, Button btn_type) {
-
+    printf("managed to enter rH_aR\n");
+    printf("%d",elevator.floor);
     order_data_t newRequest;
     newRequest.floor = btn_floor;
     newRequest.button = btn_type;

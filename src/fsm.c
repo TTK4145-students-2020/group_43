@@ -39,13 +39,13 @@ static void __attribute__((constructor)) fsm_init(){
 */
     outputDevice = elevio_getOutputDevice();
 	elevator.id = ID_ELEVATOR;
-	network_askRecovery();
 }
 
 //new, a max function, apparently not defiend i c as i could find...
 inline int max ( int a, int b ) { return a > b ? a : b; } 
 
 //new, setLights for all hall and local cab. to replace old one
+/*
 static void fsm_setAllLights(void){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
@@ -56,6 +56,16 @@ static void fsm_setAllLights(void){
                 }
             }
             outputDevice.requestButtonLight(floor, Button(btn), max(lightValue, elevator.requests[floor][btn]));
+        }
+    }
+}
+*/
+
+//temp for testing
+void fsm_setAllLights(void){
+    for(int floor = 0; floor < N_FLOORS; floor++){
+        for(int btn = 0; btn < N_BUTTONS; btn++){
+            outputDevice.requestButtonLight(floor, static_cast<Button>(btn), elevator.requests[floor][btn]);
         }
     }
 }
@@ -172,7 +182,7 @@ void fsm_onDoorTimeout(void){
     elevator_print(elevator);
 }
 
-elevator_data_t* fsm_getElevator() {
+elevator_data_t fsm_getElevator() {
     return elevator;
 }
 

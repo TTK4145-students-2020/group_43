@@ -145,17 +145,18 @@ void network_forwardMessage(char* msg)
 	switch (received_msg.id)
 	{
 		case ID_ORDER_MESSAGE:
-			printf("received order for floor %d",(int) received_msg.data.order.floor);
+			printf("received order for floor %d\n",(int) received_msg.data.order.floor);
 			if(requestHandler_toTakeAssignedRequest(received_msg.data.order)){
 				fsm_onRequestButtonPress(received_msg.data.order.floor,received_msg.data.order.button);
 			}
 			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ELEVATOR_MESSAGE:
-			printf("received elevator state with floor %d",(int) received_msg.data.elevator.floor);
+			printf("received elevator state with floor %d\n",(int) received_msg.data.elevator.floor);
 			if(received_msg.data.elevator.id == ID_ELEVATOR) {
+				printf("recieved backup\n");
 				//can return the backup as elevator message, then the elevatorid would be our id
-				fsm_initFromBackup(received_msg.data.elevator);
+				//fsm_initFromBackup(received_msg.data.elevator);
 			}
 			else {
 				requestHandler_updateOtherElevators(received_msg.data.elevator);

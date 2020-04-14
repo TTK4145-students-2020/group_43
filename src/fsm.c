@@ -39,7 +39,6 @@ static void __attribute__((constructor)) fsm_init(){
     
     outputDevice = elevio_getOutputDevice();
 	elevator.id = ID_ELEVATOR;
-	network_askRecovery();
 }
 
 //new, a max function, apparently not defiend i c as i could find...
@@ -177,23 +176,25 @@ void fsm_onDoorTimeout(void){
 
 void fsm_updateOtherElevators(elevator_data_t newState) {
     //find out where elev with ip/id is stored locally
-    int elevIndex = 0; 
+    elevator_data_t* elevToUpdate;
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
         if(otherElevators[i].id == newState.id) {
-            elevIndex = i;
+            elevToUpdate = otherElevators+i;
             break;
         }
     }
+	if (elevator.id == newstate.id)
+		elevToUpdate = &elevator;
     //syntax to be changed based on how order_data_t is changed, could probabily be done simpler 
-    otherElevators[elevIndex].floor = newState.floor;
-    otherElevators[elevIndex].dirn = newState.dirn;
+    elevToUpdate->floor = newState.floor;
+    elevToUpdate->dirn = newState.dirn;
     for(int f = 0; f<N_FLOORS; f++){
         for(int btn = 0; btn<N_BUTTONS; btn++){
-            otherElevators[elevIndex].requests[f][btn] = newState.requests[f][btn];
+            elevToUpdate->requests[f][btn] = newState.requests[f][btn];
         }
     }
-    otherElevators[elevIndex].behaviour = newState.behaviour;
-    otherElevators[elevIndex].timer->start();
+    elevToUpdate->behaviour = newState.behaviour;
+    elevToUpdate->timer->start();
 
 }
 

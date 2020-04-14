@@ -32,8 +32,7 @@ int main(int argc,char** argv){
 		probaRandomError = atoi(argv[2]);
 	}
 	
-    network_init(probaRandomError);
-	
+    
     int inputPollRate_ms = 25;
     con_load("elevator.con",
         con_val("inputPollRate_ms", &inputPollRate_ms, "%d")
@@ -41,6 +40,11 @@ int main(int argc,char** argv){
     
     ElevInputDevice input = elevio_getInputDevice();    
     
+	network_init(probaRandomError);
+	
+	static int prev[N_FLOORS][N_BUTTONS]; //must be placed before the ask of Recovery, otherwise we don't see any change
+	network_askRecovery();
+	
 	//init, add extra stuff
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
@@ -48,7 +52,6 @@ int main(int argc,char** argv){
         
     while(1){
         { // Request button
-            static int prev[N_FLOORS][N_BUTTONS];
             for(int f = 0; f < N_FLOORS; f++){
                 for(int b = 0; b < N_BUTTONS; b++){
                     int v = input.requestButton(f, b);
@@ -63,8 +66,9 @@ int main(int argc,char** argv){
 						else {
 							network_broadcast(&newRequest);
 						}   
+						prev[f][b] = v;
                     }
-                    prev[f][b] = v;
+					
                 }
             }
         }

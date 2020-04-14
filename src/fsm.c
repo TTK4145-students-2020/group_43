@@ -13,7 +13,7 @@
 
 static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
-static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1]; //new
+
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();
@@ -25,7 +25,7 @@ static void __attribute__((constructor)) fsm_init(){
             con_match(CV_InDirn)
         )
     )
-
+/*
     for (int i = 0; i<NUMBER_ELEVATOR-1; i++) { //new
         otherElevators[i] = elevator_uninitialized();
         con_load("elevator.con",
@@ -36,7 +36,7 @@ static void __attribute__((constructor)) fsm_init(){
 			)
 		)
     }
-    
+*/
     outputDevice = elevio_getOutputDevice();
 	elevator.id = ID_ELEVATOR;
 	network_askRecovery();
@@ -172,31 +172,36 @@ void fsm_onDoorTimeout(void){
     elevator_print(elevator);
 }
 
-/*---------------------------------newfiles---------------------------------*/
-
-
-void fsm_updateOtherElevators(elevator_data_t newState) {
-    //find out where elev with ip/id is stored locally
-    int elevIndex = 0; 
-    for(int i = 0; i<NUMBER_ELEVATOR; i++){
-        if(otherElevators[i].id == newState.id) {
-            elevIndex = i;
-            break;
-        }
-    }
-    //syntax to be changed based on how order_data_t is changed, could probabily be done simpler 
-    otherElevators[elevIndex].floor = newState.floor;
-    otherElevators[elevIndex].dirn = newState.dirn;
-    for(int f = 0; f<N_FLOORS; f++){
-        for(int btn = 0; btn<N_BUTTONS; btn++){
-            otherElevators[elevIndex].requests[f][btn] = newState.requests[f][btn];
-        }
-    }
-    otherElevators[elevIndex].behaviour = newState.behaviour;
-    otherElevators[elevIndex].timer->start();
-
+elevator_data_t fsm_getElevator() {
+    return elevator;
 }
 
+void fsm_initFromBackup(elevator_data_t elevBackup) {
+    elevator.floor = elevBackup.floor;
+    elevator.dirn = elevBackup.dirn;
+    for(int f = 0; f<N_FLOORS; f++){
+        for(int btn = 0; btn<N_BUTTONS; btn++){
+            elevator.requests[f][btn] = elevBackup.requests[f][btn];
+        }
+    }
+    elevator.behaviour = elevBackup.behaviour;
+
+    outputDevice.motorDirection(elevator.dirn);
+    outputDevice.floorIndicator(elevator.floor);
+    switch(elevator.behaviour){
+        
+    case EB_DoorOpen:
+        outputDevice.doorLight(1);
+        timer_start(elevator.config->doorOpenDuration_s);
+        break;
+
+    case EB_Moving:
+        break;
+        
+    case EB_Idle:
+        break;
+    }
+}
 
 
 

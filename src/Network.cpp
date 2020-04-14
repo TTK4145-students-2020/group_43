@@ -1,4 +1,7 @@
 #include "Network.h"
+#include "requestHandler.h"
+#include "fsm.h"
+#include "globals.hpp"
 
 void network_broadcastMessage(message_t* order);
 void network_receive_message(const char* ip, char* data, int datalength);
@@ -141,14 +144,21 @@ void network_forwardMessage(char* msg)
 	{
 		case ID_ORDER_MESSAGE:
 			printf("received order for floor %d",(int) received_msg.data.order.floor);
+			if(requestHandler_toTakeAssignedRequest(received_msg.data.order)){
+				fsm_onRequestButtonPress();
+			}
 			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ELEVATOR_MESSAGE:
 			printf("received elevator state with floor %d",(int) received_msg.data.elevator.floor);
+			if(received_msg.data.elevator.id == ELEVATOR_ID) 
+			requestHandler_updateOtherElevators(received_msg.data.elevator)
 			//fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ASK_RECOVER:
 			printf("\nask for recovery\n\n");
+			elevator_data_t elevatorBackup = requestHandler_getElevatorBackup(received_msg.id);
+			network_broadcastMessage()
 			//network_broadcastMessage(requestHandler_getElevator(receivedMessage.recoveryId);				
 			break;
 		default:

@@ -41,7 +41,7 @@ int main(int argc,char** argv){
     
     ElevInputDevice input = elevio_getInputDevice();    
     
-	//init, add extra stuff
+	usleep(inputPollRate_ms*10000); //to give the constructor time to update elevator if there is a backup avalible
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
     }
@@ -54,14 +54,14 @@ int main(int argc,char** argv){
                     int v = input.requestButton(f, b);
                     if(v  &&  v != prev[f][b]){
 						//here was my point with doing this in fsm
-						order_data_t newRequest = requestHandler_assignNewRequest(elevator,otherElevators,f,b); 
-						if(requestHandler_toTakeAssignedRequest(elevator, newRequest)) {
+						order_data_t newRequest = requestHandler_assignNewRequest(fsm_getElevator(),f,b); 
+						if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, b);
-							network_broadcast(&elevator_data_t ...);
-							fsm_setAllLights();
+							network_broadcast(fsm_getElevator());
+							//fsm_setAllLights();
 						}
 						else {
-							network_broadcast(&newRequest);
+							network_broadcast(fsm_getElevator());
 						}   
                     }
                     prev[f][b] = v;
@@ -74,8 +74,8 @@ int main(int argc,char** argv){
             int f = input.floorSensor();
             if(f != -1  &&  f != prev){
                 fsm_onFloorArrival(f);
-				network_broadcast(&elevator_data_t ...);
-				fsm_setAllLights();
+				network_broadcast(fsm_getElevator());
+				//fsm_setAllLights();
             }
             prev = f;
         }
@@ -83,9 +83,9 @@ int main(int argc,char** argv){
         
         { // Timer
             if(timer_timedOut()){
-                fsm_onDoorTimeout();
+                //fsm_onDoorTimeout();
                 timer_stop();
-				network_broadcast(&elevator_data_t ...);
+				network_broadcast(fsm_getElevator());
             }
         }
         // some checkout timerThread.timeout or is this handled?

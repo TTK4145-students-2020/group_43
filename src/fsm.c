@@ -182,8 +182,8 @@ void fsm_onDoorTimeout(void){
     elevator_print(elevator);
 }
 
-elevator_data_t fsm_getElevator() {
-    return elevator;
+elevator_data_t* fsm_getElevator() {
+    return &elevator;
 }
 
 void fsm_initFromBackup(elevator_data_t elevBackup) {

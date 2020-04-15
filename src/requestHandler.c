@@ -27,10 +27,10 @@ static void __attribute__((constructor)) requestHandler_init(){
     
 }
 
-elevator_data_t requestHandler_getElevatorBackup(int elevId) {
+elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
         if(otherElevators[i].id == elevId) {
-            return otherElevators[i];
+            return &otherElevators[i];
         }
     }
 }
@@ -67,37 +67,40 @@ int requestHandler_toTakeAssignedRequest(order_data_t assignedRequest) {
 }
 
 // returns an assigned request, where the id of the chosen elevator is included
-order_data_t requestHandler_assignNewRequest(elevator_data_t elevator, int btn_floor, Button btn_type) {
+order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_floor, Button btn_type) {
     printf("managed to enter rH_aR\n");
-    printf("%d",elevator.floor);
+    printf("%d\n",elevator->floor);
     order_data_t newRequest;
     newRequest.floor = btn_floor;
     newRequest.button = btn_type;
 
     if (btn_type == B_Cab) {
-        newRequest.owner = elevator.id;
+        newRequest.owner = elevator->id;
         return newRequest;
     }
-
+    
     float cost[NUMBER_ELEVATOR];
     for (int i = 0; i<NUMBER_ELEVATOR; i++) {
         cost[i] = INT_MAX;
     }
+    
     cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
+    printf("managed to take cost of other el\n");
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
-        if (otherElevators[i].timer->isTimedOut()) {
-            cost[i] = costFunc_timeToServeRequest(otherElevators[i-1], btn_type, btn_floor);
+        if (1){//(otherElevators[i].timer->isTimedOut()) {
+            cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;
             }
         }
     }
     if (minCostIndex == 0) {
-        newRequest.owner = elevator.id;
+        newRequest.owner = elevator->id;
     }
     else {
         newRequest.owner = otherElevators[minCostIndex-1].id;
     }
+    printf("finished assigning\n");
     return newRequest;
 }

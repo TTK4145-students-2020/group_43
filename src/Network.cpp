@@ -165,7 +165,7 @@ void network_forwardMessage(char* msg)
 			break;
 		case ID_ASK_RECOVER:
 			printf("\nask for recovery\n\n");
-			network_broadcast(requestHandler_getElevatorBackup(received_msg.id));
+			//network_broadcast(requestHandler_getElevatorBackup(received_msg.id));
 			//network_broadcastMessage(requestHandler_getElevator(receivedMessage.recoveryId);				
 			break;
 		default:

@@ -32,7 +32,7 @@ int main(int argc,char** argv){
 		probaRandomError = atoi(argv[2]);
 	}
 	
-    //network_init(probaRandomError);
+    network_init(probaRandomError);
 	
     int inputPollRate_ms = 25;
     con_load("elevator.con",
@@ -54,11 +54,13 @@ int main(int argc,char** argv){
                 for(int b = 0; b < N_BUTTONS; b++){
                     int v = input.requestButton(f, static_cast<Button>(b));
                     if(v  &&  v != prev[f][b]){
+                        printf("f is %d\n",fsm_getElevator()->floor);
+                        printf("f is %d\n",fsm_getElevator()->floor);
                         order_data_t newRequest = requestHandler_assignNewRequest(fsm_getElevator(),f,static_cast<Button>(b)); 
 						printf("not rH fault\n");
                         if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, static_cast<Button>(b));
-							//network_broadcast(fsm_getElevator());
+							network_broadcast(fsm_getElevator());
 							//fsm_setAllLights();
 						}
 						else {
@@ -75,7 +77,7 @@ int main(int argc,char** argv){
             int f = input.floorSensor();
             if(f != -1  &&  f != prev){
                 fsm_onFloorArrival(f);
-				//network_broadcast(fsm_getElevator());
+				network_broadcast(fsm_getElevator());
 				//fsm_setAllLights();
             }
             prev = f;
@@ -86,7 +88,7 @@ int main(int argc,char** argv){
             if(timer_timedOut()){
                 fsm_onDoorTimeout();
                 timer_stop();
-				//network_broadcast(fsm_getElevator());
+				network_broadcast(fsm_getElevator());
             }
         }
         // some checkout timerThread.timeout or is this handled?

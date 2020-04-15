@@ -56,7 +56,9 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
         }
     }
     otherElevators[elevIndex].behaviour = newElevState.behaviour;
+    printf("update other elevator.. elevIndex = %d  ..", elevIndex);
     otherElevators[elevIndex].timer->start();
+    printf("ok\n");
 }
 
 int requestHandler_toTakeAssignedRequest(order_data_t assignedRequest) {
@@ -88,13 +90,16 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     int minCostIndex = 0;
     printf("managed to take cost of other el\n");
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
-        if (1){//(otherElevators[i].timer->isTimedOut()) {
+        printf("checking otherElevator[%d]  \n", i-1); 
+        if (otherElevators[i-1].timer->isTimedOut()) {  // changed [i] to [i-1].
             cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;
             }
         }
+        printf("    .. OK .getTime() = %f \n", otherElevators[i-1].timer->getTime());
     }
+    
     if (minCostIndex == 0) {
         newRequest.owner = elevator->id;
     }

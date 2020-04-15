@@ -1,9 +1,11 @@
 
 #include "elevator.h"
-
+#include "globals.hpp"
 #include <stdio.h>
 
 #include "timer.h"
+
+
 
 char* eb_toString(ElevatorBehaviour_t eb){
     return (char*) (
@@ -44,10 +46,12 @@ void elevator_print(elevator_data_t es){
 }
 
 elevator_data_t elevator_uninitialized(void){
+    printf("Initalizing timers..\n");
     return (elevator_data_t){
         .floor = -1,
         .dirn = D_Stop,
         .behaviour = EB_Idle,
+        .timer = new threadTimer(ELEVATOR_TIMEOUT_DURATION),
         .config = new config_t {
             .clearRequestVariant = CV_All,
             .doorOpenDuration_s = 3.0,

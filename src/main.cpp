@@ -47,7 +47,8 @@ int main(int argc,char** argv){
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
     }
-        
+    elevator_data_t* p_elevator = fsm_getElevator(); 
+    elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
     while(1){
         { // Request button
             static int prev[N_FLOORS][N_BUTTONS];
@@ -55,11 +56,11 @@ int main(int argc,char** argv){
                 for(int b = 0; b < N_BUTTONS; b++){
                     int v = input.requestButton(f, static_cast<Button>(b));
                     if(v  &&  v != prev[f][b]){
-                        order_data_t newRequest = requestHandler_assignNewRequest(fsm_getElevator(),f,static_cast<Button>(b)); 
+                        order_data_t newRequest = requestHandler_assignNewRequest(p_elevator,f,static_cast<Button>(b)); 
                         if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, static_cast<Button>(b));
-							network_broadcast(fsm_getElevator());
-							//fsm_setAllLights();
+							network_broadcast(p_elevator);
+							fsm_setAllLights(p_otherElevators);
 						}
 						else {
                             printf("going to broadcast new request\n");
@@ -87,7 +88,7 @@ int main(int argc,char** argv){
             if(timer_timedOut()){
                 fsm_onDoorTimeout();
                 timer_stop();
-				network_broadcast(fsm_getElevator());
+				network_broadcast(p_elevator);
             }
         }
         // some checkout timerThread.timeout or is this handled?

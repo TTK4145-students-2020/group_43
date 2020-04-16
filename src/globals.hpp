@@ -8,7 +8,7 @@
 #define N_BUTTONS 3
 #define ELEVATOR_TIMEOUT_DURATION 60    //seconds
 
-static uint8_t ID_ELEVATOR;
+extern uint8_t ID_ELEVATOR;
 
 typedef enum {
     // Assume everyone waiting for the elevator gets on the elevator, even if 

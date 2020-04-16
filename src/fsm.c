@@ -13,7 +13,7 @@
 
 static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
-
+//uint8_t ID_ELEVATOR = 1;
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();

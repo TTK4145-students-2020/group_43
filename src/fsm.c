@@ -13,7 +13,7 @@
 
 static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
-//uint8_t ID_ELEVATOR = 1;
+
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();
@@ -46,7 +46,7 @@ inline int max ( int a, int b ) { return a > b ? a : b; }
 
 //new, setLights for all hall and local cab. to replace old one
 
-void fsm_setAllLights(elevator_data_t* otherElevators){
+void fsm_setAllLights(elevator_data_t otherElevators[]){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             int lightValue = 0;

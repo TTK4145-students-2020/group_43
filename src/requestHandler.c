@@ -38,11 +38,7 @@ elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
             return &otherElevators[i];
         }
     }
-<<<<<<< HEAD
     return NULL;
-=======
-	return 0; //TODO: should we handle this case?
->>>>>>> 70fd2e4d5cd9c00154af74eca34f216ed13c7dbf
 }
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {

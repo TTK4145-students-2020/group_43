@@ -49,6 +49,7 @@ int main(int argc,char** argv){
     elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
     while(1){
         { // Request button
+            static int prev[N_FLOORS][N_BUTTONS];
             for(int f = 0; f < N_FLOORS; f++){
                 for(int b = 0; b < N_BUTTONS; b++){
                     int v = input.requestButton(f, static_cast<Button>(b));

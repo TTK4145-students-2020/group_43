@@ -23,7 +23,7 @@ uint8_t probaRandomError;
 
 void network_init(uint8_t probaErr)
 {	
-    printf("Init the network ...\n");
+    printf("Init the network id %u...\n",ID_ELEVATOR);
 	udp_startReceiving(COMM_PORT, network_receive_message);
 	
 	/* initialize random seed for simulating network error: */
@@ -89,7 +89,8 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	}
     printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
     //network_printRawMessage(data,LENGHT_MESSAGE);
-	
+	if(data[0] == ID_ELEVATOR) //data[0] = ID of message
+		return;
 	uint8_t position;
 	uint8_t positionFound = 0;
 	

@@ -12,6 +12,7 @@
 #include "threadTimer.hpp"
 #include "globals.hpp"
 
+uint8_t ID_ELEVATOR = 1;
 
 int main(int argc,char** argv){
     printf("Started!\n");
@@ -21,7 +22,6 @@ int main(int argc,char** argv){
 		printf("First one is the elevator ID\n");
 		printf("Second one is the probability of error while sending a message\n\n");
 				
-	ID_ELEVATOR = 1;
 	uint8_t probaRandomError = 0;
 	if(argc>1)
 	{
@@ -40,30 +40,27 @@ int main(int argc,char** argv){
     
     ElevInputDevice input = elevio_getInputDevice();    
     
-	network_init(probaRandomError);
-	
-	static int prev[N_FLOORS][N_BUTTONS]; //must be placed before the ask of Recovery, otherwise we don't see any change
-	network_askRecovery();
-	
-	//init, add extra stuff
+    network_askRecovery();
+	sleep(3); //to give the constructor time to update elevator if there is a backup avalible
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
     }
-        
+    elevator_data_t* p_elevator = fsm_getElevator(); 
+    elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
     while(1){
         { // Request button
             for(int f = 0; f < N_FLOORS; f++){
                 for(int b = 0; b < N_BUTTONS; b++){
-                    int v = input.requestButton(f, b);
+                    int v = input.requestButton(f, static_cast<Button>(b));
                     if(v  &&  v != prev[f][b]){
-						//here was my point with doing this in fsm
-						order_data_t newRequest = requestHandler_assignNewRequest(elevator,otherElevators,f,b); 
-						if(requestHandler_toTakeAssignedRequest(elevator, newRequest)) {
-							fsm_onRequestButtonPress(f, b);
-							network_broadcast(&elevator_data_t ...);
-							fsm_setAllLights();
+                        order_data_t newRequest = requestHandler_assignNewRequest(p_elevator,f,static_cast<Button>(b)); 
+                        if(requestHandler_toTakeAssignedRequest(newRequest)) {
+							fsm_onRequestButtonPress(f, static_cast<Button>(b));
+							network_broadcast(p_elevator);
+							fsm_setAllLights(p_otherElevators);
 						}
 						else {
+                            printf("going to broadcast new request\n");
 							network_broadcast(&newRequest);
 						}   
 						prev[f][b] = v;
@@ -78,8 +75,8 @@ int main(int argc,char** argv){
             int f = input.floorSensor();
             if(f != -1  &&  f != prev){
                 fsm_onFloorArrival(f);
-				network_broadcast(&elevator_data_t ...);
-				fsm_setAllLights();
+				network_broadcast(fsm_getElevator());
+				//fsm_setAllLights();
             }
             prev = f;
         }
@@ -89,7 +86,7 @@ int main(int argc,char** argv){
             if(timer_timedOut()){
                 fsm_onDoorTimeout();
                 timer_stop();
-				network_broadcast(&elevator_data_t ...);
+				network_broadcast(p_elevator);
             }
         }
         // some checkout timerThread.timeout or is this handled?

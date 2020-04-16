@@ -13,7 +13,7 @@
 
 static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
-static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1]; //new
+
 
 static void __attribute__((constructor)) fsm_init(){
     elevator = elevator_uninitialized();
@@ -25,7 +25,7 @@ static void __attribute__((constructor)) fsm_init(){
             con_match(CV_InDirn)
         )
     )
-
+/*
     for (int i = 0; i<NUMBER_ELEVATOR-1; i++) { //new
         otherElevators[i] = elevator_uninitialized();
         con_load("elevator.con",
@@ -36,7 +36,7 @@ static void __attribute__((constructor)) fsm_init(){
 			)
 		)
     }
-    
+*/
     outputDevice = elevio_getOutputDevice();
 	elevator.id = ID_ELEVATOR;
 }
@@ -45,7 +45,8 @@ static void __attribute__((constructor)) fsm_init(){
 inline int max ( int a, int b ) { return a > b ? a : b; } 
 
 //new, setLights for all hall and local cab. to replace old one
-static void fsm_setAllLights(void){
+
+void fsm_setAllLights(elevator_data_t otherElevators[]){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             int lightValue = 0;
@@ -55,6 +56,16 @@ static void fsm_setAllLights(void){
                 }
             }
             outputDevice.requestButtonLight(floor, Button(btn), max(lightValue, elevator.requests[floor][btn]));
+        }
+    }
+}
+
+
+//temp for testing
+void fsm_setAllLights(void){
+    for(int floor = 0; floor < N_FLOORS; floor++){
+        for(int btn = 0; btn < N_BUTTONS; btn++){
+            outputDevice.requestButtonLight(floor, static_cast<Button>(btn), elevator.requests[floor][btn]);
         }
     }
 }
@@ -171,33 +182,36 @@ void fsm_onDoorTimeout(void){
     elevator_print(elevator);
 }
 
-/*---------------------------------newfiles---------------------------------*/
-
-
-void fsm_updateOtherElevators(elevator_data_t newState) {
-    //find out where elev with ip/id is stored locally
-    elevator_data_t* elevToUpdate;
-    for(int i = 0; i<NUMBER_ELEVATOR; i++){
-        if(otherElevators[i].id == newState.id) {
-            elevToUpdate = otherElevators+i;
-            break;
-        }
-    }
-	if (elevator.id == newstate.id)
-		elevToUpdate = &elevator;
-    //syntax to be changed based on how order_data_t is changed, could probabily be done simpler 
-    elevToUpdate->floor = newState.floor;
-    elevToUpdate->dirn = newState.dirn;
-    for(int f = 0; f<N_FLOORS; f++){
-        for(int btn = 0; btn<N_BUTTONS; btn++){
-            elevToUpdate->requests[f][btn] = newState.requests[f][btn];
-        }
-    }
-    elevToUpdate->behaviour = newState.behaviour;
-    elevToUpdate->timer->start();
-
+elevator_data_t* fsm_getElevator() {
+    return &elevator;
 }
 
+void fsm_initFromBackup(elevator_data_t elevBackup) {
+    elevator.floor = elevBackup.floor;
+    elevator.dirn = elevBackup.dirn;
+    for(int f = 0; f<N_FLOORS; f++){
+        for(int btn = 0; btn<N_BUTTONS; btn++){
+            elevator.requests[f][btn] = elevBackup.requests[f][btn];
+        }
+    }
+    elevator.behaviour = elevBackup.behaviour;
+
+    outputDevice.motorDirection(elevator.dirn);
+    outputDevice.floorIndicator(elevator.floor);
+    switch(elevator.behaviour){
+        
+    case EB_DoorOpen:
+        outputDevice.doorLight(1);
+        timer_start(elevator.config->doorOpenDuration_s);
+        break;
+
+    case EB_Moving:
+        break;
+        
+    case EB_Idle:
+        break;
+    }
+}
 
 
 

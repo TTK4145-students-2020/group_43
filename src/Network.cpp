@@ -1,4 +1,8 @@
+#include "globals.hpp"
 #include "Network.h"
+#include "requestHandler.h"
+#include "fsm.h"
+
 
 void network_broadcastMessage(message_t* order);
 void network_receive_message(const char* ip, char* data, int datalength);
@@ -16,11 +20,12 @@ uint8_t numberOfMessagesReceived[SIZE_BUFFER_MESSAGES];
 threadTimer* receiveMessageTimer[SIZE_BUFFER_MESSAGES];
 uint8_t probaRandomError;
 
+//uint8_t ID_ELEVATOR;
 
 
 void network_init(uint8_t probaErr)
 {	
-    printf("Init the network ...\n");
+    printf("Init the network id %u...\n",ID_ELEVATOR);
 	udp_startReceiving(COMM_PORT, network_receive_message);
 	
 	/* initialize random seed for simulating network error: */
@@ -28,8 +33,10 @@ void network_init(uint8_t probaErr)
 	probaRandomError = probaErr;
 	
 	for (uint8_t i = 0; i < SIZE_BUFFER_MESSAGES ; i++)
+	{
 		network_freeBufferReceivedMessage(i);
 		receiveMessageTimer[i] = new threadTimer(TIMEOUT_RECEIVE_MESSAGE);
+	}
 	printf("Init the network ... DONE\n\n");
 }
 
@@ -59,7 +66,7 @@ void network_broadcastMessage(message_t* data)
 		{
 			uint8_t flipByte = rand()%15;
 			msg[flipByte] = (msg[flipByte] + 10) % 255; //create an error in the message
-			printf("error in message %u\n",i);
+			printf("Adding error in message %u\n",i);
 		}
 		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
 		usleep(1000); //wait 1ms between all the messages
@@ -82,9 +89,12 @@ void network_receive_message(const char* ip, char* data, int datalength)
 		printf("Unknown message\n");
 		return;
 	}
-    printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
+    #if DEBUG == true
+	printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
+	#endif
     //network_printRawMessage(data,LENGHT_MESSAGE);
-	
+	if(data[0] == ID_ELEVATOR) //data[0] = ID of message
+		return;
 	uint8_t position;
 	uint8_t positionFound = 0;
 	
@@ -99,7 +109,6 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	}
 	if (positionFound==0)
 	{
-		printf("//it is the first message with this ID that we receive\n");
 		//look for a free place to store the comming messages
 		network_checkAndRecoverTimesOut();
 		for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
@@ -115,12 +124,9 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	}
 	if (positionFound ==0)
 	{
-		printf("\n/!\\ ERROR, we should have found a place to store the message at this point !!\n\n");
-		printf("We delete the oldest message\n");
 		position = getOldestMessage();
 		network_freeBufferReceivedMessage(position);
 	}
-	printf("we store this message in position %d ; %u to analyse it\n",position,numberOfMessagesReceived[position]);
 	//now position is the place where we should store the data
 	
 	//add the message received to the group of the same messages	
@@ -140,15 +146,31 @@ void network_forwardMessage(char* msg)
 	switch (received_msg.id)
 	{
 		case ID_ORDER_MESSAGE:
-			printf("received order for floor %d",(int) received_msg.data.order.floor);
+		    #if DEBUG == true
+			printf("received order for floor %d\n",(int) received_msg.data.order.floor);
+			#endif
+			if(requestHandler_toTakeAssignedRequest(received_msg.data.order)){
+				fsm_onRequestButtonPress(received_msg.data.order.floor,received_msg.data.order.button);
+			}
 			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ELEVATOR_MESSAGE:
-			printf("received elevator state with floor %d",(int) received_msg.data.elevator.floor);
+		    #if DEBUG == true
+			printf("received elevator state with floor %d\n",(int) received_msg.data.elevator.floor);
+			#endif
+			if(received_msg.data.elevator.id == ID_ELEVATOR) {
+				printf("recieved backup\n");
+				//can return the backup as elevator message, then the elevatorid would be our id
+				//fsm_initFromBackup(received_msg.data.elevator);
+			}
+			else {
+				requestHandler_updateOtherElevators(received_msg.data.elevator);
+			}
 			//fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ASK_RECOVER:
-			printf("\nask for recovery\n\n");
+			printf("\nask for recovery\n\n"); //TODO: actually do something useful
+			//network_broadcast(requestHandler_getElevatorBackup(received_msg.id));
 			//network_broadcastMessage(requestHandler_getElevator(receivedMessage.recoveryId);				
 			break;
 		default:
@@ -172,7 +194,6 @@ void network_checkAndRecoverTimesOut()
 			printf("Time out for message at position %d. Checking if we ca extract data\n",pos);
 			if (numberOfMessagesReceived[pos]>= NUMBER_MESSAGES/2+1) //we need more than half the messages to correct
 			{
-				printf("we could save the message\n");
 				network_forwardMessage(receivedMessage[pos][0]);
 				network_freeBufferReceivedMessage(pos);
 			}

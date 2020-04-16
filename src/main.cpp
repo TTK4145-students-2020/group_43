@@ -26,7 +26,6 @@ int main(int argc,char** argv){
 	if(argc>1)
 	{
 		ID_ELEVATOR = atoi(argv[1]);
-		printf("Define ID_ELEVATOR to %u",ID_ELEVATOR);
 	}
 	if(argc>2)
 	{

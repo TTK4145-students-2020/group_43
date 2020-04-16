@@ -45,8 +45,8 @@ static void __attribute__((constructor)) fsm_init(){
 inline int max ( int a, int b ) { return a > b ? a : b; } 
 
 //new, setLights for all hall and local cab. to replace old one
-/*
-static void fsm_setAllLights(void){
+
+void fsm_setAllLights(elevator_data_t* otherElevators){
     for(int floor = 0; floor < N_FLOORS; floor++){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             int lightValue = 0;
@@ -59,7 +59,7 @@ static void fsm_setAllLights(void){
         }
     }
 }
-*/
+
 
 //temp for testing
 void fsm_setAllLights(void){

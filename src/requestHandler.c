@@ -27,12 +27,17 @@ static void __attribute__((constructor)) requestHandler_init(){
     
 }
 
+elevator_data_t* requestHandler_getOtherElevators(void) {
+    return otherElevators;
+}
+
 elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
         if(otherElevators[i].id == elevId) {
             return &otherElevators[i];
         }
     }
+    return NULL;
 }
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
@@ -96,7 +101,6 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
         }
         printf("    .. OK .getTime() = %f \n", otherElevators[i-1].timer->getTime());
     }
-    
     if (minCostIndex == 0) {
         newRequest.owner = elevator->id;
     }

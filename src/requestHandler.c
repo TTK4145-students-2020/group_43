@@ -11,6 +11,7 @@
 #include "requestHandler.h"
 
 static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1];
+//uint8_t ID_ELEVATOR = 1;
 
 static void __attribute__((constructor)) requestHandler_init(){
     for (int i = 0; i<NUMBER_ELEVATOR-1; i++) {

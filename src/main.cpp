@@ -12,6 +12,7 @@
 #include "threadTimer.hpp"
 #include "globals.hpp"
 
+uint8_t ID_ELEVATOR = 1;
 
 int main(int argc,char** argv){
     printf("Started!\n");
@@ -21,11 +22,11 @@ int main(int argc,char** argv){
 		printf("First one is the elevator ID\n");
 		printf("Second one is the probability of error while sending a message\n\n");
 				
-	ID_ELEVATOR = 1;
 	uint8_t probaRandomError = 0;
 	if(argc>1)
 	{
 		ID_ELEVATOR = atoi(argv[1]);
+		printf("Define ID_ELEVATOR to %u",ID_ELEVATOR);
 	}
 	if(argc>2)
 	{

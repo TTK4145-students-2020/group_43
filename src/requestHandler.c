@@ -70,8 +70,6 @@ int requestHandler_toTakeAssignedRequest(order_data_t assignedRequest) {
 
 // returns an assigned request, where the id of the chosen elevator is included
 order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_floor, Button btn_type) {
-    printf("managed to enter rH_aR\n");
-    printf("%d\n",elevator->floor);
     order_data_t newRequest;
     newRequest.floor = btn_floor;
     newRequest.button = btn_type;
@@ -85,13 +83,12 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     for (int i = 0; i<NUMBER_ELEVATOR; i++) {
         cost[i] = INT_MAX;
     }
-    
+
     cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
-    printf("managed to take cost of other el\n");
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
         printf("checking otherElevator[%d]  \n", i-1); 
-        if (otherElevators[i-1].timer->isTimedOut()) {  // changed [i] to [i-1].
+        if (!otherElevators[i-1].timer->isTimedOut()) {  // changed [i] to [i-1].
             cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;

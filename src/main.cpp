@@ -54,17 +54,15 @@ int main(int argc,char** argv){
                 for(int b = 0; b < N_BUTTONS; b++){
                     int v = input.requestButton(f, static_cast<Button>(b));
                     if(v  &&  v != prev[f][b]){
-                        printf("f is %d\n",fsm_getElevator()->floor);
-                        printf("f is %d\n",fsm_getElevator()->floor);
                         order_data_t newRequest = requestHandler_assignNewRequest(fsm_getElevator(),f,static_cast<Button>(b)); 
-						printf("not rH fault\n");
                         if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, static_cast<Button>(b));
 							network_broadcast(fsm_getElevator());
 							//fsm_setAllLights();
 						}
 						else {
-							//network_broadcast(&newRequest);
+                            printf("going to broadcast new request\n");
+							network_broadcast(&newRequest);
 						}   
                     }
                     prev[f][b] = v;

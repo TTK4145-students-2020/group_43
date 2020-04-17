@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../globals.hpp"
+#include "../globals.h"
 
 void elevator_hardware_init();
 

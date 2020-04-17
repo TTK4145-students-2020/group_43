@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <sys/time.h>
-#include "threadTimerImplementation.hpp"
+#include "threadTimerImplementation.h"
 #include <unistd.h>
 
 static double get_wall_time(void){

@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "globals.hpp"
+#include "globals.h"
 
 
 void order_update_queue(order_data_t received_order); //

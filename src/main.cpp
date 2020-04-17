@@ -9,8 +9,8 @@
 
 #include "requestHandler.h"
 #include "Network.h"
-#include "threadTimer.hpp"
-#include "globals.hpp"
+#include "threadTimer.h"
+#include "globals.h"
 
 uint8_t ID_ELEVATOR = 1;
 

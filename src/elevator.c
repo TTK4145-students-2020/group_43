@@ -1,6 +1,6 @@
 
 #include "elevator.h"
-#include "globals.hpp"
+#include "globals.h"
 #include <stdio.h>
 
 #include "timer.h"

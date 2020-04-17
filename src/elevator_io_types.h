@@ -1,7 +1,7 @@
 #ifndef ELEVATOR_IO_TYPES_H
 #define ELEVATOR_IO_TYPES_H
 
-#include "globals.hpp"
+#include "globals.h"
 
 
 typedef struct {

@@ -1,4 +1,4 @@
-#include "threadTimer.hpp"
+#include "threadTimer.h"
 
 threadTimer::threadTimer()
     :   implementation(threadTimerImplementation(1)) 

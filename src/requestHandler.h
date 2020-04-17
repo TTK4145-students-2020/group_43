@@ -1,8 +1,14 @@
 #pragma once
 
+#include <limits.h>
+#include <string.h>
+#include <stdio.h>
+
+#include "con_load.h"
+#include "costFunc.h"
 #include "elevator.h"
 #include "elevator_io_types.h"
-#include "globals.hpp"
+#include "globals.h"
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState);
 elevator_data_t* requestHandler_getElevatorBackup(int elevId);

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "elevator_io_types.h"
-#include "threadTimer.hpp"
-#include "globals.hpp"
+#include "threadTimer.h"
+#include "globals.h"
 
 void elevator_print(elevator_data_t es);
 

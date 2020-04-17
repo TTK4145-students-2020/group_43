@@ -1,8 +1,15 @@
 #ifndef FSM_H
 #define FSM_H
 
+#include <stdio.h>
+
+#include "con_load.h"
+#include "elevator.h"
+#include "elevator_io_device.h"
 #include "elevator_io_types.h"
-#include "globals.hpp"
+#include "requests.h"
+#include "timer.h"
+#include "globals.h"
 #include "Network.h"
 
 void fsm_onInitBetweenFloors(void);

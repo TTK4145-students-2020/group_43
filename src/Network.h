@@ -7,9 +7,9 @@
 #include <string.h> //for memcpy
 #include "sverresnetwork.h"
 #include "Order_handler.h" //to give the received order into the order_handler module
-#include "threadTimer.hpp"
+#include "threadTimer.h"
 #include "fsm.h"
-#include "globals.hpp"
+#include "globals.h"
 
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */

@@ -14,6 +14,8 @@
 
 uint8_t ID_ELEVATOR = 1;
 
+void handleDeadElevators();
+
 int main(int argc,char** argv){
     printf("Started!\n");
 	
@@ -75,7 +77,7 @@ int main(int argc,char** argv){
                 }
             }
         }
-        
+            handleDeadElevators();
         { // Floor sensor
             static int prev;
             int f = input.floorSensor();
@@ -99,4 +101,56 @@ int main(int argc,char** argv){
         
         usleep(inputPollRate_ms*1000);
     }
+    return 1;
+}
+
+void handleDeadElevators(){
+    /*Check self*/
+    static bool oldLocalElevatorTimedOut = 0;
+    elevator_data_t* p_elevator = fsm_getElevator();
+    bool localElevatorTimedOut = p_elevator->timer->isTimedOut();
+    if (localElevatorTimedOut && (localElevatorTimedOut != oldLocalElevatorTimedOut)) 
+    {
+        printf("local elevator died\n");
+        for (int floor = 0; floor < N_FLOORS; floor++)
+                for (int button = 0; button < N_BUTTONS; button++)
+                    if (p_elevator->requests[floor][button])
+                    {
+                        if ((Button)button == B_Cab)
+                            printf("\n\nSomeone is stuck in elevator %d !! \n\n", p_elevator->id);
+                        order_data_t recoveredOrder = requestHandler_assignNewRequest(p_elevator, floor, (Button)button);
+                        network_broadcast(&recoveredOrder);
+                    }     
+        requestHandler_wipeElevatorRequests(p_elevator);
+    }
+    oldLocalElevatorTimedOut = localElevatorTimedOut;
+
+    /*Check others*/
+    static bool oldOtherElevatorTimedOut[NUMBER_ELEVATOR] = { };
+    elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
+    bool otherElevatorTimedOut[NUMBER_ELEVATOR] = { };
+    for (int i = 0; i < NUMBER_ELEVATOR-1; i++)
+        otherElevatorTimedOut[i] = p_otherElevators[i].timer->isTimedOut();
+    for (int i = 0; i < NUMBER_ELEVATOR-1; i++)
+    {
+        if (otherElevatorTimedOut[i] && (otherElevatorTimedOut[i]) != oldOtherElevatorTimedOut[i])
+        {
+            printf("other elevator died. id= %d", p_otherElevators->id);
+            for (int floor = 0; floor < N_FLOORS; floor++)
+                for (int button = 0; button < N_BUTTONS; button++)
+                    if (p_otherElevators[i].requests[floor][button])
+                    {
+                        if ((Button)button == B_Cab)
+                            printf("\n\nSomeone is stuck in elevator %d !! \n\n", p_otherElevators[i].id);
+                        order_data_t recoveredOrder = requestHandler_assignNewRequest(p_elevator, floor, (Button)button);
+                        if (requestHandler_toTakeAssignedRequest(recoveredOrder))
+                            fsm_onRequestButtonPress(floor, (Button)button);
+                        else
+                            network_broadcast(&recoveredOrder);
+                    }
+            requestHandler_wipeElevatorRequests((p_otherElevators+i));
+        }
+        oldOtherElevatorTimedOut[i] = otherElevatorTimedOut[i];
+    }
+    
 }

@@ -58,6 +58,12 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     elevator_print(otherElevators[elevIndex]); //print of that elevator
 }
 
+void requestHandler_wipeElevatorRequests(elevator_data_t* e){
+    for (int floor = 0; floor < N_FLOORS; floor++)
+        for (int btn = 0; btn < N_BUTTONS; btn++)
+            e->requests[floor][btn]=0;
+}
+
 int requestHandler_toTakeAssignedRequest(order_data_t assignedRequest) {
     if (assignedRequest.owner == ID_ELEVATOR) {
         return 1;

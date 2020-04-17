@@ -32,6 +32,7 @@ int main(int argc,char** argv){
 		probaRandomError = atoi(argv[2]);
 	}
 	
+	network_init(probaRandomError);
     
     int inputPollRate_ms = 25;
     con_load("elevator.con",
@@ -63,6 +64,7 @@ int main(int argc,char** argv){
 						else {
                             printf("going to broadcast new request\n");
 							network_broadcast(&newRequest);
+							//fsm_setAllLights(p_otherElevators); //TODO: is it neeeded?
 						}   
 						prev[f][b] = v;
                     }

@@ -149,19 +149,19 @@ void network_forwardMessage(char* msg)
 		    #if DEBUG == true
 			printf("received order for floor %d\n",(int) received_msg.data.order.floor);
 			#endif
-			if(requestHandler_toTakeAssignedRequest(received_msg.data.order)){
+			if(requestHandler_toTakeAssignedRequest(received_msg.data.order))
+			{
 				fsm_onRequestButtonPress(received_msg.data.order.floor,received_msg.data.order.button);
 			}
-			//order_update_queue(received_msg.data.order); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ELEVATOR_MESSAGE:
 		    #if DEBUG == true
 			printf("received elevator state with floor %d\n",(int) received_msg.data.elevator.floor);
 			#endif
-			if(received_msg.data.elevator.id == ID_ELEVATOR) {
-				printf("recieved backup\n");
-				//can return the backup as elevator message, then the elevatorid would be our id
-				//fsm_initFromBackup(received_msg.data.elevator);
+			if(received_msg.data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor ==-1) //elevalor uninitialized need recovery
+			{
+				printf("Recieved backup\n");
+				fsm_initFromBackup(received_msg.data.elevator);
 			}
 			else {
 				printf("recieved elev update from id=%d, ID_ELEVATOR=%d\n",received_msg.data.elevator.id,ID_ELEVATOR);
@@ -170,10 +170,16 @@ void network_forwardMessage(char* msg)
 			//fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ASK_RECOVER:
-			printf("\nask for recovery\n\n"); //TODO: actually do something useful
-			//network_broadcast(requestHandler_getElevatorBackup(received_msg.id));
-			//network_broadcastMessage(requestHandler_getElevator(receivedMessage.recoveryId);				
+		{
+		    #if DEBUG == true
+			printf("\nask for recovery\n\n");
+		    #endif
+			elevator_data_t* otherElevators = requestHandler_getOtherElevators();
+			for(uint8_t i = 0; i< NUMBER_ELEVATOR ; i++)
+				if (otherElevators[i].id == received_msg.data.IdToRecover)
+					network_broadcast(otherElevators+i);
 			break;
+		}
 		default:
 			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
 	}

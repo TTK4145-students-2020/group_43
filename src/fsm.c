@@ -186,14 +186,7 @@ elevator_data_t* fsm_getElevator() {
 }
 
 void fsm_initFromBackup(elevator_data_t elevBackup) {
-    elevator.floor = elevBackup.floor;
-    elevator.dirn = elevBackup.dirn;
-    for(int f = 0; f<N_FLOORS; f++){
-        for(int btn = 0; btn<N_BUTTONS; btn++){
-            elevator.requests[f][btn] = elevBackup.requests[f][btn];
-        }
-    }
-    elevator.behaviour = elevBackup.behaviour;
+	memcpy(&elevator, &elevBackup, sizeof(elevBackup));
 
     outputDevice.motorDirection(elevator.dirn);
     outputDevice.floorIndicator(elevator.floor);

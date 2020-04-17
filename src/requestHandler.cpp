@@ -15,7 +15,6 @@ static void __attribute__((constructor)) requestHandler_init(){
 		)
         otherElevators[i].id = -1;
     }
-    
 }
 
 elevator_data_t* requestHandler_getOtherElevators(void) {
@@ -32,7 +31,8 @@ elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
 }
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
-    //find out where elev with ip/id is stored locally
+    if(newElevState.id == ID_ELEVATOR) return; //it was not an other elevator but our
+	//find out where elev with ip/id is stored locally
     printf("updating other elevator with id=%d\n",newElevState.id);
     int elevIndex = 0; 
     for(int i = 0; i<NUMBER_ELEVATOR; i++){

@@ -1,7 +1,4 @@
-#include "globals.hpp"
 #include "Network.h"
-#include "requestHandler.h"
-#include "fsm.h"
 
 
 void network_broadcastMessage(message_t* order);
@@ -11,6 +8,7 @@ void network_freeBufferReceivedMessage(uint8_t position);
 void network_checkAndRecoverTimesOut();
 uint8_t getOldestMessage();
 void network_printRawMessage(char* msg, uint16_t size);
+void checkNewElevatorId(char* data);
 
 
 message_t received_msg;
@@ -109,6 +107,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	}
 	if (positionFound==0)
 	{
+		checkNewElevatorId(data);
 		//look for a free place to store the comming messages
 		network_checkAndRecoverTimesOut();
 		for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
@@ -164,10 +163,8 @@ void network_forwardMessage(char* msg)
 				fsm_initFromBackup(received_msg.data.elevator);
 			}
 			else {
-				printf("recieved elev update from id=%d, ID_ELEVATOR=%d\n",received_msg.data.elevator.id,ID_ELEVATOR);
 				requestHandler_updateOtherElevators(received_msg.data.elevator);
 			}
-			//fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.
 			break;
 		case ID_ASK_RECOVER:
 		{
@@ -228,4 +225,9 @@ void network_printRawMessage(char* msg, uint16_t size)
 {
 	for (uint16_t i = 0;i<size;i++)
 		printf("%d ",(int)msg[i]);
+}
+
+void checkNewElevatorId(char* data)
+{
+	
 }

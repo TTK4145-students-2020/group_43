@@ -6,7 +6,8 @@
 #include <unistd.h> //for sleep function
 #include <string.h> //for memcpy
 #include "sverresnetwork.h"
-#include "Order_handler.h" //to give the received order into the order_handler module
+//#include "Order_handler.h" //to give the received order into the order_handler module
+#include "requestHandler.h"
 #include "threadTimer.h"
 #include "fsm.h"
 #include "globals.h"

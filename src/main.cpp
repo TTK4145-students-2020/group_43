@@ -69,9 +69,9 @@ int main(int argc,char** argv){
 							network_broadcast(&newRequest);
 							//fsm_setAllLights(p_otherElevators); //TODO: is it neeeded?
 						}   
-						prev[f][b] = v;
                     }
-					
+					prev[f][b] = v;
+
                 }
             }
         }

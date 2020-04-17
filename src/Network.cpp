@@ -164,6 +164,7 @@ void network_forwardMessage(char* msg)
 				//fsm_initFromBackup(received_msg.data.elevator);
 			}
 			else {
+				printf("recieved elev update from id=%d, ID_ELEVATOR=%d\n",received_msg.data.elevator.id,ID_ELEVATOR);
 				requestHandler_updateOtherElevators(received_msg.data.elevator);
 			}
 			//fsm_updateOtherElevators(received_msg.data.elevator); //no pointer because we want order_handler to copy the order.

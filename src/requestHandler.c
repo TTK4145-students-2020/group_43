@@ -43,6 +43,7 @@ elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     //find out where elev with ip/id is stored locally
+    printf("updating other elevator with id=%d\n",newElevState.id);
     int elevIndex = 0; 
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
         if(otherElevators[i].id == -1){ //if this is the first time recieving an update form this elevator
@@ -62,9 +63,9 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
         }
     }
     otherElevators[elevIndex].behaviour = newElevState.behaviour;
-    printf("update other elevator.. elevIndex = %d  ..", elevIndex);
+    printf("updated other elevator with id=%d, elevIndex = %d  ..", otherElevators[elevIndex].id, elevIndex);
     otherElevators[elevIndex].timer->start();
-    printf("ok\n");
+    elevator_print(otherElevators[elevIndex]); //print of that elevator
 }
 
 int requestHandler_toTakeAssignedRequest(order_data_t assignedRequest) {
@@ -95,12 +96,15 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
         printf("checking otherElevator[%d]  \n", i-1); 
         if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {  // changed [i] to [i-1].
+            printf("floor of other elevator=%d\n",otherElevators[i-1].floor);
             cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
+                printf("rH_ass: other elevator with id=%d\n",otherElevators[i].id);
                 minCostIndex = i;
             }
+            printf("    .. OK .getTime() = %f \n", otherElevators[i-1].timer->getTime());
+
         }
-        printf("    .. OK .getTime() = %f \n", otherElevators[i-1].timer->getTime());
     }
     if (minCostIndex == 0) {
         newRequest.owner = elevator->id;

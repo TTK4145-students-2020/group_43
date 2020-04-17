@@ -47,7 +47,9 @@ int main(int argc,char** argv){
         fsm_onInitBetweenFloors();
     }
     elevator_data_t* p_elevator = fsm_getElevator(); 
+	p_elevator->id = ID_ELEVATOR;
     elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
+	printf("ID of this elevator is %u",p_elevator->id);
     while(1){
         { // Request button
             static int prev[N_FLOORS][N_BUTTONS];

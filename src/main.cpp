@@ -32,6 +32,7 @@ int main(int argc,char** argv){
 		probaRandomError = atoi(argv[2]);
 	}
 	
+	network_init(probaRandomError);
     
     int inputPollRate_ms = 25;
     con_load("elevator.con",
@@ -46,9 +47,9 @@ int main(int argc,char** argv){
         fsm_onInitBetweenFloors();
     }
     elevator_data_t* p_elevator = fsm_getElevator(); 
+	p_elevator->id = ID_ELEVATOR;
     elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
-    printf("ID_ELEVATOR=%d, elevator.id=%d",ID_ELEVATOR,p_elevator->id);
-
+	printf("ID of this elevator is %u",p_elevator->id);
     while(1){
         { // Request button
             static int prev[N_FLOORS][N_BUTTONS];
@@ -66,6 +67,7 @@ int main(int argc,char** argv){
 						else {
                             printf("going to broadcast new request\n");
 							network_broadcast(&newRequest);
+							//fsm_setAllLights(p_otherElevators); //TODO: is it neeeded?
 						}   
 						prev[f][b] = v;
                     }

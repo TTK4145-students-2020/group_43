@@ -94,7 +94,7 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     int minCostIndex = 0;
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
         printf("checking otherElevator[%d]  \n", i-1); 
-        if (!otherElevators[i-1].timer->isTimedOut()) {  // changed [i] to [i-1].
+        if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {  // changed [i] to [i-1].
             cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
                 minCostIndex = i;

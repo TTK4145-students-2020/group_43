@@ -47,6 +47,8 @@ int main(int argc,char** argv){
     }
     elevator_data_t* p_elevator = fsm_getElevator(); 
     elevator_data_t* p_otherElevators = requestHandler_getOtherElevators();
+    printf("ID_ELEVATOR=%d, elevator.id=%d",ID_ELEVATOR,p_elevator->id);
+
     while(1){
         { // Request button
             static int prev[N_FLOORS][N_BUTTONS];
@@ -55,6 +57,7 @@ int main(int argc,char** argv){
                     int v = input.requestButton(f, static_cast<Button>(b));
                     if(v  &&  v != prev[f][b]){
                         order_data_t newRequest = requestHandler_assignNewRequest(p_elevator,f,static_cast<Button>(b)); 
+                        printf("Buttonpress\nowner of new order is %d\n", newRequest.owner);
                         if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, static_cast<Button>(b));
 							network_broadcast(p_elevator);
@@ -76,8 +79,8 @@ int main(int argc,char** argv){
             int f = input.floorSensor();
             if(f != -1  &&  f != prev){
                 fsm_onFloorArrival(f);
-				network_broadcast(fsm_getElevator());
-				//fsm_setAllLights();
+				network_broadcast(p_elevator);
+				fsm_setAllLights(p_otherElevators);
             }
             prev = f;
         }
@@ -91,7 +94,7 @@ int main(int argc,char** argv){
             }
         }
         // some checkout timerThread.timeout or is this handled?
-
+        
         usleep(inputPollRate_ms*1000);
     }
 }

@@ -68,9 +68,12 @@ static void setAllLights(Elevator es){
 }
 */
 void fsm_onInitBetweenFloors(void){
-    outputDevice.motorDirection(D_Down);
-    elevator.dirn = D_Down;
-    elevator.behaviour = EB_Moving;
+    if(elevator.floor == -1){ // no backup avalible
+        outputDevice.motorDirection(D_Down);
+        elevator.dirn = D_Down;
+        elevator.behaviour = EB_Moving;
+    }
+    
 }
 
 void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
@@ -193,6 +196,8 @@ void fsm_initFromBackup(elevator_data_t elevBackup) {
     case EB_Idle:
         break;
     }
+    printf("init from backup, new state:\n");
+    elevator_print(elevator);
 }
 
 

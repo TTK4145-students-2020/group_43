@@ -95,6 +95,7 @@ int main(int argc,char** argv){
 				network_broadcast(p_elevator);
             }
         }
+        //fsm_setAllLights(p_otherElevators);
         // some checkout timerThread.timeout or is this handled?
         
         usleep(inputPollRate_ms*1000);

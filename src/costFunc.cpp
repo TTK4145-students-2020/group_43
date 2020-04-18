@@ -1,7 +1,7 @@
 #include "costFunc.h"
 
 #include <stdio.h>
-
+#include <limits>
 #include "con_load.h"
 #include "elevator_io_device.h"
 #include "requests.h"
@@ -11,6 +11,8 @@
 float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f)
 {
     elevator_data_t e = *e_old;
+	if(e.id ==-1)
+		return std::numeric_limits<float>::max();
     const double DOOR_OPEN_TIME = e.config->doorOpenDuration_s;
     e.requests[f][b] = 1;
 

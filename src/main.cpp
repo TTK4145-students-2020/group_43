@@ -42,7 +42,6 @@ int main(int argc,char** argv){
     ElevInputDevice input = elevio_getInputDevice();    
     
     network_busyAskRecovery(TIMEOUT_RECOVERY);
-	sleep(3); //to give the constructor time to update elevator if there is a backup avalible
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
     }

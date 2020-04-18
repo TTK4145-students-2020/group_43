@@ -169,13 +169,18 @@ elevator_data_t* fsm_getElevator() {
 }
 
 void fsm_initFromBackup(elevator_data_t elevBackup) {
-	memcpy(&elevator, &elevBackup, sizeof(elevBackup));
+    elevator.floor = elevBackup.floor;
     if(elevator.floor == -1){
         printf("bad backup recieved, ignoring\n");
         return;
     }
-    outputDevice.motorDirection(elevator.dirn);
+    elevator.dirn = elevBackup.dirn;
+	memcpy(&(elevator.requests), &(elevBackup.requests), sizeof(elevBackup.requests));
+    elevator.behaviour = elevBackup.behaviour;
+
     outputDevice.floorIndicator(elevator.floor);
+    outputDevice.motorDirection(elevator.dirn);
+    
     switch(elevator.behaviour){
         
     case EB_DoorOpen:

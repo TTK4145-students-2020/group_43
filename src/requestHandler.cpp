@@ -38,6 +38,7 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     for(int i = 0; i<NUMBER_ELEVATOR; i++){
         if(otherElevators[i].id == -1){ //if this is the first time recieving an update form this elevator
             otherElevators[i].id = newElevState.id;
+			printf("new elevator in the network, id %u\n",newElevState.id);
         }
         if(otherElevators[i].id == newElevState.id) {
             elevIndex = i;

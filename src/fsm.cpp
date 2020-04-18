@@ -1,5 +1,7 @@
 
 #include "fsm.h"
+#include "Network.h"
+#include "requestHandler.h"
 
 static elevator_data_t      elevator;
 static ElevOutputDevice     outputDevice;
@@ -30,10 +32,8 @@ static void __attribute__((constructor)) fsm_init(){
     outputDevice = elevio_getOutputDevice();
 }
 
-//new, a max function, apparently not defiend i c as i could find...
-inline int max ( int a, int b ) { return a > b ? a : b; } 
 
-//new, setLights for all hall and local cab. to replace old one
+inline int max ( int a, int b ) { return a > b ? a : b; } 
 
 void fsm_setAllLights(elevator_data_t otherElevators[]){
     for(int floor = 0; floor < N_FLOORS; floor++){
@@ -49,28 +49,13 @@ void fsm_setAllLights(elevator_data_t otherElevators[]){
     }
 }
 
-
-//temp for testing
-void fsm_setAllLights(void){
-    for(int floor = 0; floor < N_FLOORS; floor++){
-        for(int btn = 0; btn < N_BUTTONS; btn++){
-            outputDevice.requestButtonLight(floor, static_cast<Button>(btn), elevator.requests[floor][btn]);
-        }
-    }
-}
-/*
-static void setAllLights(Elevator es){
-    for(int floor = 0; floor < N_FLOORS; floor++){
-        for(int btn = 0; btn < N_BUTTONS; btn++){
-            outputDevice.requestButtonLight(floor, btn, es.requests[floor][btn]);
-        }
-    }
-}
-*/
 void fsm_onInitBetweenFloors(void){
-    outputDevice.motorDirection(D_Down);
-    elevator.dirn = D_Down;
-    elevator.behaviour = EB_Moving;
+    if(elevator.floor == -1){ // no backup available
+        outputDevice.motorDirection(D_Down);
+        elevator.dirn = D_Down;
+        elevator.behaviour = EB_Moving;
+    }
+    
 }
 
 void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
@@ -105,8 +90,9 @@ void fsm_onRequestButtonPress(int btn_floor, Button btn_type){
         break;
         
     }
-    
-    //setAllLights(elevator);
+
+    network_broadcast(&elevator);
+	fsm_setAllLights(requestHandler_getOtherElevators());
     
     printf("\nNew state:\n");
     elevator_print(elevator);
@@ -128,7 +114,9 @@ void fsm_onFloorArrival(int newFloor){
         if(requests_shouldStop(elevator)){
             outputDevice.motorDirection(D_Stop);
             outputDevice.doorLight(1);
+            printf("requests.cpp doesn't have access to clear orders if we have segfault here\n");
             elevator = requests_clearAtCurrentFloor(elevator);
+            printf("managed to delete orders\n");
             timer_start(elevator.config->doorOpenDuration_s);
             //setAllLights(elevator);
             elevator.behaviour = EB_DoorOpen;
@@ -138,6 +126,9 @@ void fsm_onFloorArrival(int newFloor){
         break;
     }
     
+    network_broadcast(&elevator);
+	fsm_setAllLights(requestHandler_getOtherElevators());
+
     printf("\nNew state:\n");
     elevator_print(elevator); 
 }
@@ -167,6 +158,8 @@ void fsm_onDoorTimeout(void){
         break;
     }
     
+    network_broadcast(&elevator);
+
     printf("\nNew state:\n");
     elevator_print(elevator);
 }
@@ -175,11 +168,19 @@ elevator_data_t* fsm_getElevator() {
     return &elevator;
 }
 
-void fsm_initFromBackup(elevator_data_t elevBackup) {
-	memcpy(&elevator, &elevBackup, sizeof(elevBackup));
+bool fsm_initFromBackup(elevator_data_t elevBackup) {
+    elevator.floor = elevBackup.floor;
+    if(elevator.floor == -1){
+        printf("bad backup recieved, ignoring\n");
+        return false;
+    }
+    elevator.dirn = elevBackup.dirn;
+	memcpy(&(elevator.requests), &(elevBackup.requests), sizeof(elevBackup.requests));
+    elevator.behaviour = elevBackup.behaviour;
 
-    outputDevice.motorDirection(elevator.dirn);
     outputDevice.floorIndicator(elevator.floor);
+    outputDevice.motorDirection(elevator.dirn);
+    
     switch(elevator.behaviour){
         
     case EB_DoorOpen:
@@ -193,6 +194,13 @@ void fsm_initFromBackup(elevator_data_t elevBackup) {
     case EB_Idle:
         break;
     }
+
+    network_broadcast(&elevator);
+	fsm_setAllLights(requestHandler_getOtherElevators());
+
+    printf("initialized from backup, new state:\n");
+    elevator_print(elevator);
+	return true;
 }
 
 

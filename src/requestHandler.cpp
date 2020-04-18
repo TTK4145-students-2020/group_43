@@ -1,4 +1,5 @@
 #include "requestHandler.h"
+#include "fsm.h"
 
 static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1];
 //uint8_t ID_ELEVATOR = 1;
@@ -33,11 +34,11 @@ elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     if(newElevState.id == ID_ELEVATOR) return; //it was not an other elevator but our
 	//find out where elev with ip/id is stored locally
-    printf("updating other elevator with id=%d\n",newElevState.id);
     int elevIndex = 0; 
-    for(int i = 0; i<NUMBER_ELEVATOR; i++){
+    for(int i = 0; i<NUMBER_ELEVATOR-1; i++){
         if(otherElevators[i].id == -1){ //if this is the first time recieving an update form this elevator
             otherElevators[i].id = newElevState.id;
+			printf("new elevator in the network, id %u\n",newElevState.id);
         }
         if(otherElevators[i].id == newElevState.id) {
             elevIndex = i;
@@ -53,9 +54,16 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
         }
     }
     otherElevators[elevIndex].behaviour = newElevState.behaviour;
-    printf("updated other elevator with id=%d, elevIndex = %d  ..", otherElevators[elevIndex].id, elevIndex);
-    otherElevators[elevIndex].timer->start();
-    elevator_print(otherElevators[elevIndex]); //print of that elevator
+
+    if(otherElevators[elevIndex].behaviour == EB_Idle) {
+        otherElevators[elevIndex].timer->stop();
+    }
+    else {
+        otherElevators[elevIndex].timer->start();
+    }
+    fsm_setAllLights(otherElevators);
+    printf("updated other elevator with id=%d\n", otherElevators[elevIndex].id);
+    //elevator_print(otherElevators[elevIndex]); //print of that elevator
 }
 
 void requestHandler_wipeElevatorRequests(elevator_data_t* e){
@@ -91,7 +99,7 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     int minCostIndex = 0;
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
         printf("checking otherElevator[%d]  \n", i-1); 
-        if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {  // changed [i] to [i-1].
+        if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {
             printf("floor of other elevator=%d\n",otherElevators[i-1].floor);
             cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {

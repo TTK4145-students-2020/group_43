@@ -43,8 +43,8 @@ int main(int argc,char** argv){
     
     ElevInputDevice input = elevio_getInputDevice();    
     
-    network_askRecovery();
-	sleep(3); //to give the constructor time to update elevator if there is a backup avalible
+    network_busyAskRecovery(TIMEOUT_RECOVERY); //this function wait until it has been recover or timeout
+	
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
     }
@@ -63,8 +63,8 @@ int main(int argc,char** argv){
                         printf("Buttonpress\nowner of new order is %d\n", newRequest.owner);
                         if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, static_cast<Button>(b));
-							network_broadcast(p_elevator);
-							fsm_setAllLights(p_otherElevators);
+                            //network_broadcast(p_elevator);
+				            //fsm_setAllLights(p_otherElevators);
 						}
 						else {
                             printf("going to broadcast new request\n");
@@ -83,8 +83,8 @@ int main(int argc,char** argv){
             int f = input.floorSensor();
             if(f != -1  &&  f != prev){
                 fsm_onFloorArrival(f);
-				network_broadcast(p_elevator);
-				fsm_setAllLights(p_otherElevators);
+				//network_broadcast(p_elevator);
+				//fsm_setAllLights(p_otherElevators);
             }
             prev = f;
         }
@@ -97,6 +97,7 @@ int main(int argc,char** argv){
 				network_broadcast(p_elevator);
             }
         }
+        //fsm_setAllLights(p_otherElevators);
         // some checkout timerThread.timeout or is this handled?
         
         usleep(inputPollRate_ms*1000);

@@ -40,4 +40,4 @@ requestHandler: test_requestHandler.c
 	$(CC) $(rH_DEP) -o test_requestHandler -lpthread -Wall
 
 	
-.PHONY: all rebuild clean
+.PHONY: all rebuild clean network

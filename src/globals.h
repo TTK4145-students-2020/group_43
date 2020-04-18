@@ -8,6 +8,8 @@
 #define N_BUTTONS 3
 #define ELEVATOR_TIMEOUT_DURATION 60    //seconds
 
+#define TIMEOUT_RECOVERY 1 //float in seconds
+
 extern uint8_t ID_ELEVATOR;
 
 typedef enum {

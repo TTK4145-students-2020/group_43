@@ -41,7 +41,8 @@ int main(int argc,char** argv){
     
     ElevInputDevice input = elevio_getInputDevice();    
     
-    network_busyAskRecovery(TIMEOUT_RECOVERY);
+    network_busyAskRecovery(TIMEOUT_RECOVERY); //this function wait until it has been recover or timeout
+	
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
     }

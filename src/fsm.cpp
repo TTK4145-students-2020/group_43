@@ -168,11 +168,11 @@ elevator_data_t* fsm_getElevator() {
     return &elevator;
 }
 
-void fsm_initFromBackup(elevator_data_t elevBackup) {
+bool fsm_initFromBackup(elevator_data_t elevBackup) {
     elevator.floor = elevBackup.floor;
     if(elevator.floor == -1){
         printf("bad backup recieved, ignoring\n");
-        return;
+        return false;
     }
     elevator.dirn = elevBackup.dirn;
 	memcpy(&(elevator.requests), &(elevBackup.requests), sizeof(elevBackup.requests));
@@ -200,6 +200,7 @@ void fsm_initFromBackup(elevator_data_t elevBackup) {
 
     printf("initialized from backup, new state:\n");
     elevator_print(elevator);
+	return true;
 }
 
 

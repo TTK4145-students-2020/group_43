@@ -17,6 +17,7 @@ char receivedMessage[SIZE_BUFFER_MESSAGES][NUMBER_MESSAGES][LENGHT_MESSAGE];
 uint8_t numberOfMessagesReceived[SIZE_BUFFER_MESSAGES];
 threadTimer* receiveMessageTimer[SIZE_BUFFER_MESSAGES];
 uint8_t probaRandomError;
+bool elevatorRecovered = false;
 
 //uint8_t ID_ELEVATOR;
 
@@ -74,10 +75,20 @@ void network_broadcastMessage(message_t* data)
 bool network_busyAskRecovery(float timeOut)
 { //send message to the others to send their data over the network
 	printf("asking for recovery\n");
+	elevatorRecovered = false;
 	message_t recoveryMsg;
 	recoveryMsg.id = ID_ASK_RECOVER;
 	recoveryMsg.data.IdToRecover = ID_ELEVATOR;
 	network_broadcastMessage(&recoveryMsg);
+	
+	threadTimer recoveryTimer(timeOut);
+	recoveryTimer.start();
+	while(!recoveryTimer.isTimedOut())
+	{
+		if(elevatorRecovered)
+			return true;
+	}
+	return false;
 }
 
 void network_receive_message(const char* ip, char* data, int datalength)
@@ -161,7 +172,8 @@ void network_forwardMessage(char* msg)
 			if(received_msg.data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor ==-1) //elevalor uninitialized need recovery
 			{//don't go there :()
 				printf("Recieved backup\n");
-				fsm_initFromBackup(received_msg.data.elevator);
+				if(fsm_initFromBackup(received_msg.data.elevator))
+					elevatorRecovered = true;
 			}
 			else {
 				requestHandler_updateOtherElevators(received_msg.data.elevator);

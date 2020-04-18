@@ -50,7 +50,7 @@ void fsm_setAllLights(elevator_data_t otherElevators[]){
 }
 
 void fsm_onInitBetweenFloors(void){
-    if(elevator.floor == -1){ // no backup avalible
+    if(elevator.floor == -1){ // no backup available
         outputDevice.motorDirection(D_Down);
         elevator.dirn = D_Down;
         elevator.behaviour = EB_Moving;

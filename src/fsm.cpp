@@ -68,7 +68,7 @@ static void setAllLights(Elevator es){
 }
 */
 void fsm_onInitBetweenFloors(void){
-    if(elevator.floor == -1){ // no backup avalible
+    if(elevator.floor == -1){ // no backup available
         outputDevice.motorDirection(D_Down);
         elevator.dirn = D_Down;
         elevator.behaviour = EB_Moving;
@@ -179,9 +179,11 @@ elevator_data_t* fsm_getElevator() {
 }
 
 void fsm_initFromBackup(elevator_data_t elevBackup) {
-	memcpy(&elevator, &elevBackup, sizeof(elevBackup));
-
-    outputDevice.motorDirection(elevator.dirn);
+	elevator.floor = elevBackup.floor;
+	elevator.dirn  = elevBackup.dirn;
+	memcpy(elevator.requests,elevBackup.requests,sizeof(elevBackup.requests));
+	elevator.behaviour = elevBackup.behaviour;
+	outputDevice.motorDirection(elevator.dirn);
     outputDevice.floorIndicator(elevator.floor);
     switch(elevator.behaviour){
         

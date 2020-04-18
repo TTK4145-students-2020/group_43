@@ -71,7 +71,7 @@ void network_broadcastMessage(message_t* data)
 	}
 }
 
-void network_askRecovery()
+bool network_busyAskRecovery(float timeOut)
 { //send message to the others to send their data over the network
 	printf("asking for recovery\n");
 	message_t recoveryMsg;

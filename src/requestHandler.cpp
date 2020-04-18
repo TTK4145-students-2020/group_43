@@ -1,4 +1,5 @@
 #include "requestHandler.h"
+#include "fsm.h"
 
 static elevator_data_t      otherElevators[NUMBER_ELEVATOR-1];
 //uint8_t ID_ELEVATOR = 1;
@@ -33,7 +34,6 @@ elevator_data_t* requestHandler_getElevatorBackup(int elevId) {
 void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     if(newElevState.id == ID_ELEVATOR) return; //it was not an other elevator but our
 	//find out where elev with ip/id is stored locally
-    printf("updating other elevator with id=%d\n",newElevState.id);
     int elevIndex = 0; 
     for(int i = 0; i<NUMBER_ELEVATOR-1; i++){
         if(otherElevators[i].id == -1){ //if this is the first time recieving an update form this elevator
@@ -60,7 +60,8 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     else {
         otherElevators[elevIndex].timer->start();
     }
-    printf("updated other elevator with id=%d, elevIndex = %d  ..", otherElevators[elevIndex].id, elevIndex);
+    fsm_setAllLights(otherElevators);
+    printf("updated other elevator with id=%d\n", otherElevators[elevIndex].id);
     //elevator_print(otherElevators[elevIndex]); //print of that elevator
 }
 

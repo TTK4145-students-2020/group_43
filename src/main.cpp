@@ -139,7 +139,7 @@ void handleDeadElevators(){
     {
         if (otherElevatorTimedOut[i] && (otherElevatorTimedOut[i]) != oldOtherElevatorTimedOut[i])
         {
-            printf("\nDEATH ANNOUNCEMENT!!: other elevator died. id= %d\n", p_otherElevators->id);
+            printf("\nDEATH ANNOUNCEMENT!!: other elevator died. id= %d\n", p_otherElevators[i].id);
             for (int floor = 0; floor < N_FLOORS; floor++)
                 for (int button = 0; button < N_BUTTONS; button++)
                     if (p_otherElevators[i].requests[floor][button])

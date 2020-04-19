@@ -68,7 +68,7 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
 
 void requestHandler_wipeHallwayRequests(elevator_data_t* e){
     for (int floor = 0; floor < N_FLOORS; floor++)
-        for (int btn = 1; btn < N_BUTTONS; btn++)
+        for (int btn = 0; btn < B_Cab; btn++)
             e->requests[floor][btn]=0;
 }
 

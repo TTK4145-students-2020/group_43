@@ -15,7 +15,7 @@
 uint8_t ID_ELEVATOR = 1;
 
 void handleDeadElevators();
-elevator_data_t** getPointerToAllElevatorPointers();
+void getPointerToAllElevatorPointers(elevator_data_t** allElev);
 
 int main(int argc,char** argv){
     printf("Started!\n");
@@ -45,6 +45,7 @@ int main(int argc,char** argv){
     ElevInputDevice input = elevio_getInputDevice();    
     
     network_busyAskRecovery(TIMEOUT_RECOVERY); //this function wait until it has been recover or timeout
+	
 	
     if(input.floorSensor() == -1){
         fsm_onInitBetweenFloors();
@@ -108,14 +109,15 @@ int main(int argc,char** argv){
 
 void handleDeadElevators(){
     printf("handle dead elevators\n");
-    static elevator_data_t** pp_elevators = getPointerToAllElevatorPointers(); 
+    elevator_data_t* pp_elevators[NUMBER_ELEVATOR];
+	getPointerToAllElevatorPointers(pp_elevators); 
     printf("static timers[]\n");
     static bool oldElevatorTimeOuts[NUMBER_ELEVATOR] = { };
     printf("timers[]\n");
     bool elevatorTimeOuts[NUMBER_ELEVATOR] = { };
     printf("populating timers[]\n");
     for (int i = 0; i < NUMBER_ELEVATOR; i++)
-       { elevatorTimeOuts[i] = pp_elevators[i]->id;}//->timer->isTimedOut(); printf("%d", i); fflush(stdout);}
+       { elevatorTimeOuts[i] = pp_elevators[i]->id;}//->timer->isTimedOut(); printf("%d", i); fflush(stdout);} //segfault
     for (int i = 0; i < NUMBER_ELEVATOR; i++)
     {
         printf("Checking elevator[%d] ..\n", i);
@@ -144,16 +146,15 @@ void handleDeadElevators(){
     }
 }
 
-elevator_data_t** getPointerToAllElevatorPointers()
+void getPointerToAllElevatorPointers(elevator_data_t** allElev)
 {
-    elevator_data_t* pp_elevators[NUMBER_ELEVATOR] = { };
-    pp_elevators[0] = fsm_getElevator();
-    printf("Got elevator[0], ID = %d\n", pp_elevators[0]->id);
+    allElev[0] = fsm_getElevator();
+    //printf("Got elevator[0], ID = %d\n", allElev[0]->id);
     elevator_data_t* p_othersTemp = requestHandler_getOtherElevators();
     for (int i = 0; i < NUMBER_ELEVATOR-1; i++)
     {
-        pp_elevators[i+1] = p_othersTemp+i;
-        printf("Got elevator[%d], ID = %d\n", i+1, pp_elevators[i+1]->id); fflush(stdout);
+        allElev[i+1] = p_othersTemp+i;
+        //printf("Got elevator[%d], ID = %d\n", i+1, allElev[i+1]->id); fflush(stdout);
     }
-    return pp_elevators;
+    //allElev = pp_elevators;
 }

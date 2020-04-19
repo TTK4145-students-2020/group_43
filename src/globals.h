@@ -6,7 +6,7 @@
 #define NUMBER_ELEVATOR 3
 #define N_FLOORS 4
 #define N_BUTTONS 3
-#define ELEVATOR_TIMEOUT_DURATION 60    //seconds
+#define ELEVATOR_TIMEOUT_DURATION 4     //seconds
 
 #define TIMEOUT_RECOVERY 1 //float in seconds
 

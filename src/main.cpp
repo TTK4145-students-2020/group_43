@@ -112,17 +112,20 @@ void handleDeadElevators(){
     bool localElevatorTimedOut = p_elevator->timer->isTimedOut();
     if (localElevatorTimedOut && (localElevatorTimedOut != oldLocalElevatorTimedOut)) 
     {
-        printf("local elevator died\n");
+        printf("\nDEATH ANNOUNCEMENT!!: local elevator died\n");
         for (int floor = 0; floor < N_FLOORS; floor++)
                 for (int button = 0; button < N_BUTTONS; button++)
                     if (p_elevator->requests[floor][button])
                     {
                         if ((Button)button == B_Cab)
-                            printf("\n\nSomeone is stuck in elevator %d !! \n\n", p_elevator->id);
-                        order_data_t recoveredOrder = requestHandler_assignNewRequest(p_elevator, floor, (Button)button);
-                        network_broadcast(&recoveredOrder);
+                            printf("CRITICAL WARNING!!:Someone is stuck in elevator %d !! \n\n", p_elevator->id);
+                        else 
+                        {
+                            order_data_t recoveredOrder = requestHandler_assignNewRequest(p_elevator, floor, (Button)button);
+                            network_broadcast(&recoveredOrder);
+                        }
                     }     
-        requestHandler_wipeElevatorRequests(p_elevator);
+        requestHandler_wipeHallwayRequests(p_elevator);
     }
     oldLocalElevatorTimedOut = localElevatorTimedOut;
 
@@ -136,20 +139,23 @@ void handleDeadElevators(){
     {
         if (otherElevatorTimedOut[i] && (otherElevatorTimedOut[i]) != oldOtherElevatorTimedOut[i])
         {
-            printf("other elevator died. id= %d", p_otherElevators->id);
+            printf("\nDEATH ANNOUNCEMENT!!: other elevator died. id= %d\n", p_otherElevators->id);
             for (int floor = 0; floor < N_FLOORS; floor++)
                 for (int button = 0; button < N_BUTTONS; button++)
                     if (p_otherElevators[i].requests[floor][button])
                     {
                         if ((Button)button == B_Cab)
-                            printf("\n\nSomeone is stuck in elevator %d !! \n\n", p_otherElevators[i].id);
-                        order_data_t recoveredOrder = requestHandler_assignNewRequest(p_elevator, floor, (Button)button);
-                        if (requestHandler_toTakeAssignedRequest(recoveredOrder))
-                            fsm_onRequestButtonPress(floor, (Button)button);
-                        else
-                            network_broadcast(&recoveredOrder);
+                            printf("CRITICAL WARNING!!: Someone is stuck in elevator %d !! \n\n", p_otherElevators[i].id);
+                        else 
+                        {
+                            order_data_t recoveredOrder = requestHandler_assignNewRequest(p_elevator, floor, (Button)button);
+                            if (requestHandler_toTakeAssignedRequest(recoveredOrder))
+                                fsm_onRequestButtonPress(floor, (Button)button);
+                            else
+                                network_broadcast(&recoveredOrder);
+                        }
                     }
-            requestHandler_wipeElevatorRequests((p_otherElevators+i));
+            requestHandler_wipeHallwayRequests((p_otherElevators+i));
         }
         oldOtherElevatorTimedOut[i] = otherElevatorTimedOut[i];
     }

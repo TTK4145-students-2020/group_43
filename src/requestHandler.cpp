@@ -66,9 +66,9 @@ void requestHandler_updateOtherElevators(elevator_data_t newElevState) {
     //elevator_print(otherElevators[elevIndex]); //print of that elevator
 }
 
-void requestHandler_wipeElevatorRequests(elevator_data_t* e){
+void requestHandler_wipeHallwayRequests(elevator_data_t* e){
     for (int floor = 0; floor < N_FLOORS; floor++)
-        for (int btn = 0; btn < N_BUTTONS; btn++)
+        for (int btn = 1; btn < N_BUTTONS; btn++)
             e->requests[floor][btn]=0;
 }
 
@@ -84,7 +84,7 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     order_data_t newRequest;
     newRequest.floor = btn_floor;
     newRequest.button = btn_type;
-
+    printf("Assigning new order ..");
     if (btn_type == B_Cab) {
         newRequest.owner = elevator->id;
         return newRequest;
@@ -98,16 +98,11 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
     for (int i=1; i<NUMBER_ELEVATOR; i++) {
-        printf("checking otherElevator[%d]  \n", i-1); 
         if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {
-            printf("floor of other elevator=%d\n",otherElevators[i-1].floor);
             cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if ( cost[i] < cost[i-1] ) {
-                printf("rH_ass: other elevator with id=%d\n",otherElevators[i].id);
                 minCostIndex = i;
             }
-            printf("    .. OK .getTime() = %f \n", otherElevators[i-1].timer->getTime());
-
         }
     }
     if (minCostIndex == 0) {
@@ -116,6 +111,6 @@ order_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int btn_
     else {
         newRequest.owner = otherElevators[minCostIndex-1].id;
     }
-    printf("finished assigning\n");
+    printf("Finished assigning to elevator %d\n", newRequest.owner);
     return newRequest;
 }

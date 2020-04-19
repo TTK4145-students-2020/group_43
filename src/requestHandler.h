@@ -11,7 +11,7 @@
 #include "globals.h"
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState);
-void requestHandler_wipeElevatorRequests(elevator_data_t* elevator);
+void requestHandler_wipeHallwayRequests(elevator_data_t* elevator);
 elevator_data_t* requestHandler_getElevatorBackup(int elevId);
 elevator_data_t* requestHandler_getOtherElevators(void);
 

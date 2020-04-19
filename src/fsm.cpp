@@ -114,9 +114,7 @@ void fsm_onFloorArrival(int newFloor){
         if(requests_shouldStop(elevator)){
             outputDevice.motorDirection(D_Stop);
             outputDevice.doorLight(1);
-            printf("requests.cpp doesn't have access to clear orders if we have segfault here\n");
             elevator = requests_clearAtCurrentFloor(elevator);
-            printf("managed to delete orders\n");
             timer_start(elevator.config->doorOpenDuration_s);
             //setAllLights(elevator);
             elevator.behaviour = EB_DoorOpen;

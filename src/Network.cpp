@@ -192,6 +192,7 @@ void network_forwardMessage(char* msg)
 					network_broadcast(&(otherElevators[i]));
 					printf("Recovey possible, we found some elevator data\n");
 				}
+			network_broadcast(fsm_getElevator()); //to make our state known to initiated elevator
 			break;
 		}
 		default:

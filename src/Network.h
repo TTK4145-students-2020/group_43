@@ -18,7 +18,7 @@
 #define COMM_PORT 4300 //Port to receive and send messages with the other elevators
 #define LENGHT_MESSAGE sizeof(message_t) // the max length is theoreticaly 512, but it does not work with me. can be reduced for gainz to sizeof(order_data)
 
-#define NUMBER_MESSAGES 3 //number of messages to send for redudancy
+#define NUMBER_MESSAGES 4 //number of messages to send for redudancy
 #define SIZE_BUFFER_MESSAGES 2*NUMBER_ELEVATOR //number of places we can store messages in case we receive different messages in the same time (error or not).
 #define TIMEOUT_RECEIVE_MESSAGE 0.01 //seconds
 

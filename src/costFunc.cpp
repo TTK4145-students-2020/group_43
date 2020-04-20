@@ -6,7 +6,7 @@
 #include "elevator_io_device.h"
 #include "requests.h"
 
-#define TRAVEL_TIME 1
+#define TRAVEL_TIME 2
 
 float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f)
 {

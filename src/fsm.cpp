@@ -17,18 +17,7 @@ static void __attribute__((constructor)) fsm_init(){
             con_match(CV_InDirn)
         )
     )
-/*
-    for (int i = 0; i<NUMBER_ELEVATOR-1; i++) { //new
-        otherElevators[i] = elevator_uninitialized();
-        con_load("elevator.con",
-			con_val("doorOpenDuration_s", &otherElevators[i].config->doorOpenDuration_s, "%lf")
-			con_enum("clearRequestVariant", &otherElevators[i].config->clearRequestVariant,
-				con_match(CV_All)
-				con_match(CV_InDirn)
-			)
-		)
-    }
-*/
+
     outputDevice = elevio_getOutputDevice();
 }
 
@@ -40,7 +29,7 @@ void fsm_setAllLights(elevator_data_t otherElevators[]){
         for(int btn = 0; btn < N_BUTTONS; btn++){
             int lightValue = 0;
             if (btn != B_Cab) {
-                for (int i=0; i<NUMBER_ELEVATOR-1; i++) {
+                for (int i=0; i<N_ELEVATORS-1; i++) {
                     lightValue = max(lightValue, otherElevators[i].requests[floor][btn]);
                 }
             }
@@ -116,7 +105,6 @@ void fsm_onFloorArrival(int newFloor){
             outputDevice.doorLight(1);
             elevator = requests_clearAtCurrentFloor(elevator);
             timer_start(elevator.config->doorOpenDuration_s);
-            //setAllLights(elevator);
             elevator.behaviour = EB_DoorOpen;
         }
         break;

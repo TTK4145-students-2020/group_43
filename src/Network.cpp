@@ -1,6 +1,6 @@
 #include "Network.h"
 
-void network_broadcastMessage(message_t* order);
+void network_broadcastMessage(message_t* request);
 void network_receive_message(const char* ip, char* data, int datalength);
 void network_forwardMessage(char* msg); //call the right function according to the jind of message we received
 
@@ -13,11 +13,11 @@ void network_init()
 	udp_startReceiving(COMM_PORT, network_receive_message);
 }
 
-void network_broadcast(order_data_t* order)
+void network_broadcast(request_data_t* request)
 {
 	message_t msg;
-	msg.id = ID_ORDER_MESSAGE;
-	msg.data.order = *order;
+	msg.id = ID_REQUEST_MESSAGE;
+	msg.data.request = *request;
 	network_broadcastMessage(&msg);
 }
 
@@ -51,8 +51,8 @@ bool network_busyAskRecovery(float timeOut)
 void network_broadcastMessage(message_t* data)
 {
 	char msg[LENGHT_MESSAGE];
-    memcpy(msg, data, LENGHT_MESSAGE); //convert the order struct into sendable char*
-	for(uint8_t i = 0;i<NUMBER_MESSAGES;i++)
+    memcpy(msg, data, LENGHT_MESSAGE); //convert the request struct into sendable char*
+	for(uint8_t i = 0;i<N_MESSAGES;i++)
 	{
 		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); 
 		usleep(800); //wait between all the messages
@@ -69,36 +69,37 @@ void network_receive_message(const char* ip, char* data, int datalength)
     #if DEBUG == true
 	printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
 	#endif
-	message_t received_msg;
-	memcpy(&received_msg, msg, LENGHT_MESSAGE);
-	network_forwardMessage(&received_msg);
+	
+	network_forwardMessage(data);
 }
 
-void network_forwardMessage(message_t* msg)
+void network_forwardMessage(char* msg)
 {
-	switch (received_msg->id)
+	message_t received_msg;
+	memcpy(&received_msg, msg, LENGHT_MESSAGE);
+	switch (received_msg.id)
 	{
-		case ID_ORDER_MESSAGE:
+		case ID_REQUEST_MESSAGE:
 		    #if DEBUG == true
-			printf("received order for floor %d\n",(int) received_msg->data.order.floor);
+			printf("received request for floor %d\n",(int) received_msg.data.request.floor);
 			#endif
-			if(requestHandler_toTakeAssignedRequest(received_msg->data.order))
+			if(requestHandler_toTakeAssignedRequest(received_msg.data.request))
 			{
-				fsm_onRequestButtonPress(received_msg->data.order.floor,received_msg->data.order.button);
+				fsm_onRequestButtonPress(received_msg.data.request.floor,received_msg.data.request.button);
 			}
 			break;
 		case ID_ELEVATOR_MESSAGE:
 		    #if DEBUG == true
-			printf("received elevator state with floor %d\n",(int) received_msg->data.elevator.floor);
+			printf("received elevator state with floor %d\n",(int) received_msg.data.elevator.floor);
 			#endif
-			if(received_msg->data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor == UNINITIALIZED_FLOOR) //elevalor uninitialized need recovery
+			if(received_msg.data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor == UNINITIALIZED_FLOOR) //elevalor uninitialized need recovery
 			{
 				printf("Recieved backup\n");
-				if(fsm_initFromBackup(received_msg->data.elevator))
+				if(fsm_initFromBackup(received_msg.data.elevator))
 					elevatorRecovered = true;
 			}
 			else {
-				requestHandler_updateOtherElevators(received_msg->data.elevator);
+				requestHandler_updateOtherElevators(received_msg.data.elevator);
 			}
 			break;
 		case ID_ASK_RECOVER:
@@ -107,8 +108,8 @@ void network_forwardMessage(message_t* msg)
 			printf("\nasked for recovery\n\n");
 		    #endif
 			elevator_data_t* otherElevators = requestHandler_getOtherElevators();
-			for(uint8_t i = 0; i< NUMBER_ELEVATOR ; i++)
-				if (otherElevators[i].id == received_msg->data.IdToRecover)
+			for(uint8_t i = 0; i< N_ELEVATORS ; i++)
+				if (otherElevators[i].id == received_msg.data.IdToRecover)
 				{
 					network_broadcast(&(otherElevators[i]));
 					printf("Recovey possible, we found some elevator data\n");
@@ -117,6 +118,6 @@ void network_forwardMessage(message_t* msg)
 			break;
 		}
 		default:
-			printf("Unknown message id %u, we may have lost some data\n",received_msg->id);
+			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
 	}
 }

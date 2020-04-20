@@ -24,7 +24,7 @@ threadTimerImplementation::threadTimerImplementation(double duration):
     pthread_mutex_init(&runningMtx, NULL);
 }
 
-threadTimerImplementation::~threadTimerImplementation() // This is probably completely unnecessary
+threadTimerImplementation::~threadTimerImplementation()
 {
     stopThread();
     return;

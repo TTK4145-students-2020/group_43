@@ -7,6 +7,7 @@
 #define N_FLOORS 4
 #define N_BUTTONS 3
 #define ELEVATOR_TIMEOUT_DURATION 4     //seconds
+#define UNINITIALIZED_FLOOR -1
 
 #define TIMEOUT_RECOVERY 1 //float in seconds
 

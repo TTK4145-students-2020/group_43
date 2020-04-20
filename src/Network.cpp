@@ -1,17 +1,10 @@
 #include "Network.h"
 
-#if DEBUG == true
-#include "elevator.h"
-#endif
-
-
 void network_broadcastMessage(message_t* order);
 void network_receive_message(const char* ip, char* data, int datalength);
-void network_forwardMessage(char* msg);
-void network_printRawMessage(char* msg, uint16_t size);
+void network_forwardMessage(char* msg); //call the right function according to the jind of message we received
 
-message_t received_msg;
-bool elevatorRecovered = false;
+bool elevatorRecovered = false; //flag to know when the recover is done.
 
 
 void network_init()
@@ -30,26 +23,10 @@ void network_broadcast(order_data_t* order)
 
 void network_broadcast(elevator_data_t* elData)
 {
-	#if DEBUG == true
-	printf("SENDING:\n");
-	elevator_print(*elData);
-	printf("\n\n\n");
-	#endif
 	message_t msg;
 	msg.id = ID_ELEVATOR_MESSAGE;
 	msg.data.elevator = *elData;
 	network_broadcastMessage(&msg);
-}
-
-void network_broadcastMessage(message_t* data)
-{
-	char msg[LENGHT_MESSAGE];
-    memcpy(msg, data, LENGHT_MESSAGE); //convert the order struct into sendable char*
-	for(uint8_t i = 0;i<NUMBER_MESSAGES;i++)
-	{
-		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); 
-		usleep(700); //wait between all the messages
-	}
 }
 
 bool network_busyAskRecovery(float timeOut)
@@ -71,9 +48,19 @@ bool network_busyAskRecovery(float timeOut)
 	return false;
 }
 
+void network_broadcastMessage(message_t* data)
+{
+	char msg[LENGHT_MESSAGE];
+    memcpy(msg, data, LENGHT_MESSAGE); //convert the order struct into sendable char*
+	for(uint8_t i = 0;i<NUMBER_MESSAGES;i++)
+	{
+		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); 
+		usleep(800); //wait between all the messages
+	}
+}
+
 void network_receive_message(const char* ip, char* data, int datalength)
 {
-	//TODO: check that we don't receive our own message checking the IP Address.
 	if (datalength !=LENGHT_MESSAGE)
 	{
 		printf("Unknown message\n");
@@ -82,36 +69,36 @@ void network_receive_message(const char* ip, char* data, int datalength)
     #if DEBUG == true
 	printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
 	#endif
-
-	network_forwardMessage(data);
+	message_t received_msg;
+	memcpy(&received_msg, msg, LENGHT_MESSAGE);
+	network_forwardMessage(&received_msg);
 }
 
-void network_forwardMessage(char* msg)
+void network_forwardMessage(message_t* msg)
 {
-	memcpy(&received_msg, msg, LENGHT_MESSAGE);
-	switch (received_msg.id)
+	switch (received_msg->id)
 	{
 		case ID_ORDER_MESSAGE:
 		    #if DEBUG == true
-			printf("received order for floor %d\n",(int) received_msg.data.order.floor);
+			printf("received order for floor %d\n",(int) received_msg->data.order.floor);
 			#endif
-			if(requestHandler_toTakeAssignedRequest(received_msg.data.order))
+			if(requestHandler_toTakeAssignedRequest(received_msg->data.order))
 			{
-				fsm_onRequestButtonPress(received_msg.data.order.floor,received_msg.data.order.button);
+				fsm_onRequestButtonPress(received_msg->data.order.floor,received_msg->data.order.button);
 			}
 			break;
 		case ID_ELEVATOR_MESSAGE:
 		    #if DEBUG == true
-			printf("received elevator state with floor %d\n",(int) received_msg.data.elevator.floor);
+			printf("received elevator state with floor %d\n",(int) received_msg->data.elevator.floor);
 			#endif
-			if(received_msg.data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor ==-1) //elevalor uninitialized need recovery
-			{//don't go there :()
+			if(received_msg->data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor == UNINITIALIZED_FLOOR) //elevalor uninitialized need recovery
+			{
 				printf("Recieved backup\n");
-				if(fsm_initFromBackup(received_msg.data.elevator))
+				if(fsm_initFromBackup(received_msg->data.elevator))
 					elevatorRecovered = true;
 			}
 			else {
-				requestHandler_updateOtherElevators(received_msg.data.elevator);
+				requestHandler_updateOtherElevators(received_msg->data.elevator);
 			}
 			break;
 		case ID_ASK_RECOVER:
@@ -119,10 +106,9 @@ void network_forwardMessage(char* msg)
 		    #if DEBUG == true
 			printf("\nasked for recovery\n\n");
 		    #endif
-			//printf("elevator id %u is asking for recovery",received_msg.data.IdToRecover);
 			elevator_data_t* otherElevators = requestHandler_getOtherElevators();
 			for(uint8_t i = 0; i< NUMBER_ELEVATOR ; i++)
-				if (otherElevators[i].id == received_msg.data.IdToRecover)
+				if (otherElevators[i].id == received_msg->data.IdToRecover)
 				{
 					network_broadcast(&(otherElevators[i]));
 					printf("Recovey possible, we found some elevator data\n");
@@ -131,12 +117,6 @@ void network_forwardMessage(char* msg)
 			break;
 		}
 		default:
-			printf("Unknown message id %u, we may have lost some data\n",received_msg.id);
+			printf("Unknown message id %u, we may have lost some data\n",received_msg->id);
 	}
-}
-
-void network_printRawMessage(char* msg, uint16_t size)
-{
-	for (uint16_t i = 0;i<size;i++)
-		printf("%d ",(int)msg[i]);
 }

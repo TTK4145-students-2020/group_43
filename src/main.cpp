@@ -50,8 +50,7 @@ int main(int argc,char** argv){
         fsm_onInitBetweenFloors();
     }
     
-	printf("ID of this elevator is %u\n",p_elevator->id);
-    while(1){
+	while(1){
         { // Request button
             static int prev[N_FLOORS][N_BUTTONS];
             for(int f = 0; f < N_FLOORS; f++){
@@ -145,12 +144,9 @@ void handleDeadElevators(){
 void getPointerToAllElevatorPointers(elevator_data_t** allElev)
 {
     allElev[0] = fsm_getElevator();
-    //printf("Got elevator[0], ID = %d\n", allElev[0]->id);
     elevator_data_t* p_othersTemp = requestHandler_getOtherElevators();
     for (int i = 0; i < NUMBER_ELEVATOR-1; i++)
     {
         allElev[i+1] = p_othersTemp+i;
-        //printf("Got elevator[%d], ID = %d\n", i+1, allElev[i+1]->id); fflush(stdout);
     }
-    //allElev = pp_elevators;
 }

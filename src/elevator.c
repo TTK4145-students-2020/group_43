@@ -49,7 +49,7 @@ elevator_data_t elevator_uninitialized(void){
     printf("Initalizing timers..\n");
     return (elevator_data_t){
         .id = -1,
-        .floor = -1,
+        .floor = UNINITIALIZED_FLOOR,
         .dirn = D_Stop,
         .behaviour = EB_Idle,
         .timer = new threadTimer(ELEVATOR_TIMEOUT_DURATION),

@@ -106,6 +106,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
     #if DEBUG == true
 	printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
 	#endif
+	/*
 	if (data[0] == ID_ELEVATOR_MESSAGE)
 	{
 		memcpy(&received_msg,data,LENGHT_MESSAGE);
@@ -114,8 +115,6 @@ void network_receive_message(const char* ip, char* data, int datalength)
 		printf("\n\n\n");
 	}
     //network_printRawMessage(data,LENGHT_MESSAGE);
-/*	if(data[0] == ID_ELEVATOR) //data[0] = ID of message
-		return; */
 	uint8_t position;
 	uint8_t positionFound = 0;
 	
@@ -159,10 +158,13 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	numberOfMessagesReceived[position]++;
 	if (numberOfMessagesReceived[position] == NUMBER_MESSAGES)
 	{//We received NUMBER_MESSAGES times the same message, no error!
+
 		network_forwardMessage(receivedMessage[position][0]);
 		network_freeBufferReceivedMessage(position);
 		receiveMessageTimer[position]->stop();
-	}    
+	}
+*/	
+	network_forwardMessage(data);
 }
 
 void network_forwardMessage(char* msg)

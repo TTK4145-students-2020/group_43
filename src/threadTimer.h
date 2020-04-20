@@ -1,9 +1,7 @@
 #pragma once
-
-//#include "globals.hpp" // might delete when merging
 #include "threadTimerImplementation.h"
 
-/*  Timing functionallity. ( by using threads. )*/
+/*  Timing functionallity. ( by using threads. Total overkill by the way.)*/
 class threadTimer 
 {
 private:

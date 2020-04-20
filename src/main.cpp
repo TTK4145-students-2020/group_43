@@ -21,21 +21,16 @@ int main(int argc,char** argv){
     printf("Started!\n");
 	
 	if(argc ==1)
-		printf("\nPlease add arguments: \n");
+	{
+		printf("\nPlease add arguments: ");
 		printf("First one is the elevator ID\n");
-		printf("Second one is the probability of error while sending a message\n\n");
-				
-	uint8_t probaRandomError = 0;
+	}
 	if(argc>1)
 	{
 		ID_ELEVATOR = atoi(argv[1]);
 	}
-	if(argc>2)
-	{
-		probaRandomError = atoi(argv[2]);
-	}
 	
-	network_init(probaRandomError);
+	network_init();
     
     int inputPollRate_ms = 25;
     con_load("elevator.con",

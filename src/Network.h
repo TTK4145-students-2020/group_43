@@ -41,7 +41,7 @@ typedef struct //this is the struct that is sent through the network
 	}data;
 }message_t;
 
-void network_init(uint8_t probaErr);
+void network_init();
 void network_broadcast(order_data_t* msg);
 void network_broadcast(elevator_data_t* msg);
 bool network_busyAskRecovery(float timeOut);

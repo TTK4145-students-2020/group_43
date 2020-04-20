@@ -1,5 +1,8 @@
 #include "Network.h"
+
+#if DEBUG == true
 #include "elevator.h"
+#endif
 
 
 void network_broadcastMessage(message_t* order);
@@ -7,27 +10,14 @@ void network_receive_message(const char* ip, char* data, int datalength);
 void network_forwardMessage(char* msg);
 void network_printRawMessage(char* msg, uint16_t size);
 
-
 message_t received_msg;
-uint8_t probaRandomError;
 bool elevatorRecovered = false;
 
 
-void network_init(uint8_t probaErr)
+void network_init()
 {	
     printf("Init the network id %u...\n",ID_ELEVATOR);
 	udp_startReceiving(COMM_PORT, network_receive_message);
-	
-	/* initialize random seed for simulating network error: */
-	srand (time(NULL));
-	probaRandomError = probaErr;
-	
-	for (uint8_t i = 0; i < SIZE_BUFFER_MESSAGES ; i++)
-	{
-		network_freeBufferReceivedMessage(i);
-		receiveMessageTimer[i] = new threadTimer(TIMEOUT_RECEIVE_MESSAGE);
-	}
-	printf("Init the network ... DONE\n\n");
 }
 
 void network_broadcast(order_data_t* order)
@@ -57,14 +47,8 @@ void network_broadcastMessage(message_t* data)
     memcpy(msg, data, LENGHT_MESSAGE); //convert the order struct into sendable char*
 	for(uint8_t i = 0;i<NUMBER_MESSAGES;i++)
 	{
-		if(rand()%100 < probaRandomError) 
-		{
-			uint8_t flipByte = rand()%15;
-			msg[flipByte] = (msg[flipByte] + 10) % 255; //create an error in the message
-			printf("Adding error in message %u\n",i);
-		}
-		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); //+2 is not needed, be careful of the termination though
-		usleep(1000); //wait 1ms between all the messages
+		udp_broadcast(COMM_PORT, msg, LENGHT_MESSAGE); 
+		usleep(700); //wait between all the messages
 	}
 }
 

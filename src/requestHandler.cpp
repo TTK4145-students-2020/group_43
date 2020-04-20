@@ -1,7 +1,7 @@
 #include "requestHandler.h"
 #include "fsm.h"
 
-float timeToServeRequest(elevator_data_t* e_old, Button b, int f);
+float timeToServeRequest(elevator_data_t e, Button b, int f);
 void getPointerToAllElevatorPointers(elevator_data_t** allElev);
 
 static elevator_data_t      otherElevators[N_ELEVATORS-1];
@@ -94,11 +94,11 @@ request_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int bt
         cost[i] = INT_MAX;
     }
 
-    cost[0] = timeToServeRequest(elevator, btn_type, btn_floor);
+    cost[0] = timeToServeRequest(*elevator, btn_type, btn_floor);
     int minCostIndex = 0;
     for (int i=1; i<N_ELEVATORS; i++) {
         if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {
-            cost[i] = timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
+            cost[i] = timeToServeRequest(otherElevators[i-1], btn_type, btn_floor);
             if (cost[i] < cost[i-1]) {
                 minCostIndex = i;
             }
@@ -114,10 +114,9 @@ request_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int bt
     return newRequest;
 }
 
-float timeToServeRequest(elevator_data_t* e_old, Button b, int f)
+float timeToServeRequest(elevator_data_t e, Button b, int f)
 {
-    elevator_data_t e = *e_old;
-	if(e.id ==-1)
+    if(e.id ==-1)
 		return std::numeric_limits<float>::max();
     const double DOOR_OPEN_TIME = e.config->doorOpenDuration_s;
     e.requests[f][b] = 1;

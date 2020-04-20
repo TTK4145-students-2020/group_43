@@ -41,7 +41,7 @@ bool network_busyAskRecovery(float timeOut)
 	threadTimer recoveryTimer(timeOut);
 	recoveryTimer.start();
 	while(!recoveryTimer.isTimedOut())
-	{
+	{//busy wait
 		if(elevatorRecovered)
 			return true;
 	}
@@ -92,8 +92,8 @@ void network_forwardMessage(char* msg)
 		    #if DEBUG == true
 			printf("received elevator state with floor %d\n",(int) received_msg.data.elevator.floor);
 			#endif
-			if(received_msg.data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor == UNINITIALIZED_FLOOR) //elevalor uninitialized need recovery
-			{
+			if(received_msg.data.elevator.id == ID_ELEVATOR && fsm_getElevator()->floor == UNINITIALIZED_FLOOR) 
+			{//elevalor uninitialized need recovery
 				printf("Recieved backup\n");
 				if(fsm_initFromBackup(received_msg.data.elevator))
 					elevatorRecovered = true;

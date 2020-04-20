@@ -3,12 +3,14 @@
 #include <limits.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits>
 
 #include "con_load.h"
-#include "costFunc.h"
 #include "elevator.h"
 #include "elevator_io_types.h"
 #include "globals.h"
+
+#define TRAVEL_TIME_BETWEEN_FLOOR  2
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState);
 void requestHandler_clearAllHallwayRequests(elevator_data_t* elevator);

@@ -55,11 +55,12 @@ int main(int argc,char** argv){
             for(int f = 0; f < N_FLOORS; f++){
                 for(int b = 0; b < N_BUTTONS; b++){
                     int v = input.requestButton(f, static_cast<Button>(b));
-                    if(v  &&  v != prev[f][b]){
+                    if(v  &&  v != prev[f][b]){ //new request
                         request_data_t newRequest = requestHandler_assignNewRequest(p_elevator,f,(Button)b); 
-                        printf("Buttonpress\nId of new order is %d\n", newRequest.ownerId);
+                        printf("Buttonpress\tId of the responsible elevator is %d\n", newRequest.ownerId);
                         if(requestHandler_toTakeAssignedRequest(newRequest)) {
 							fsm_onRequestButtonPress(f, (Button)b);
+							//no broadcast here because it will be a broadcast of the new state of the elevator
 						}
 						else {
 							network_broadcast(&newRequest);

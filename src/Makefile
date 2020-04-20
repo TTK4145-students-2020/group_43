@@ -2,7 +2,7 @@ CC = clang++
 
 CFLAGS = -Wall -g -std=c99 
 LDFLAGS = -lpthread -g
-SRC = main.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp requestHandler.cpp costFunc.cpp fsm.cpp elevator.c elevator_io_device.cpp driver/elevator_hardware.c requests.cpp timer.cpp
+SRC = main.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp requestHandler.cpp fsm.cpp elevator.c elevator_io_device.cpp driver/elevator_hardware.c requests.cpp timer.cpp
 SRC_network = test_network.cpp threadTimer.cpp threadTimerImplementation.cpp Network.cpp sverresnetwork.cpp Order_handler.cpp 
 TARGET =  elevator_project
 

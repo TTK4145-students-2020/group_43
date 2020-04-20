@@ -6,7 +6,7 @@
 #include "elevator_io_device.h"
 #include "requests.h"
 
-#define TRAVEL_TIME 2
+#define TRAVEL_TIME_BETWEEN_FLOOR  2
 
 float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f)
 {
@@ -28,7 +28,7 @@ float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f)
         }
         break;
     case EB_Moving:
-        duration += TRAVEL_TIME / 2;
+        duration += TRAVEL_TIME_BETWEEN_FLOOR  / 2;
         e.floor += e.dirn;
         break;
     case EB_DoorOpen:

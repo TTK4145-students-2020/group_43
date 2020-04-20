@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "elevator.h"
 
 
 void network_broadcastMessage(message_t* order);
@@ -49,6 +50,9 @@ void network_broadcast(order_data_t* order)
 
 void network_broadcast(elevator_data_t* elData)
 {
+	printf("SENDING:\n");
+	elevator_print(*elData);
+	printf("\n\n\n");
 	message_t msg;
 	msg.id = ID_ELEVATOR_MESSAGE;
 	msg.data.elevator = *elData;
@@ -102,6 +106,13 @@ void network_receive_message(const char* ip, char* data, int datalength)
     #if DEBUG == true
 	printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
 	#endif
+	if (data[0] == ID_ELEVATOR_MESSAGE)
+	{
+		memcpy(&received_msg,data,LENGHT_MESSAGE);
+		printf("RECEIVING:\n");
+		elevator_print(received_msg.data.elevator);
+		printf("\n\n\n");
+	}
     //network_printRawMessage(data,LENGHT_MESSAGE);
 /*	if(data[0] == ID_ELEVATOR) //data[0] = ID of message
 		return; */
@@ -113,12 +124,14 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	{
 		if(strcmp(receivedMessage[position][0],data) == 0) 
 		{
+			printf("We already received this message\n");
 			positionFound = 1;
 			break;
 		}
 	}
 	if (positionFound==0)
 	{
+		printf("First time we receive this message\n");
 		checkNewElevatorId(data);
 		//look for a free place to store the comming messages
 		network_checkAndRecoverTimesOut();
@@ -142,6 +155,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
 	
 	//add the message received to the group of the same messages	
 	memcpy(receivedMessage[position][numberOfMessagesReceived[position]], data, LENGHT_MESSAGE);
+	printf("we store the message in position %u, %u\n",position, numberOfMessagesReceived[position]);
 	numberOfMessagesReceived[position]++;
 	if (numberOfMessagesReceived[position] == NUMBER_MESSAGES)
 	{//We received NUMBER_MESSAGES times the same message, no error!
@@ -218,6 +232,7 @@ void network_checkAndRecoverTimesOut()
 			{
 				network_forwardMessage(receivedMessage[pos][0]);
 				network_freeBufferReceivedMessage(pos);
+				printf("data extracted\n");
 			}
 			receiveMessageTimer[pos]->stop();
 		}

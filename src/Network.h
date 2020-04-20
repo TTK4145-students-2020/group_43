@@ -28,7 +28,7 @@
 #define ID_ORDER_MESSAGE 1
 #define ID_ELEVATOR_MESSAGE 2
 
-#define DEBUG false
+#define DEBUG true
 
 typedef struct //this is the struct that is sent through the network
 {

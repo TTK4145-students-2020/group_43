@@ -88,54 +88,9 @@ int main(int argc,char** argv){
             }
         }
     
-        handleDeadElevators();
+        requestHandler_handleDeadElevators();
     
         usleep(inputPollRate_ms*1000);
     }
     return 1;
-}
-
-void handleDeadElevators(){
-    elevator_data_t* pp_elevators[N_ELEVATORS];
-	getPointerToAllElevatorPointers(pp_elevators); 
-    
-    static bool oldElevatorTimeOuts[N_ELEVATORS] = { };
-    bool elevatorTimeOuts[N_ELEVATORS] = { };
-
-    for (int i = 0; i < N_ELEVATORS; i++)
-       { elevatorTimeOuts[i] = pp_elevators[i]->timer->isTimedOut();}
-    for (int i = 0; i < N_ELEVATORS; i++)
-    {
-        if (elevatorTimeOuts[i] && (elevatorTimeOuts[i]) != oldElevatorTimeOuts[i])
-        {
-            printf("\nDEATH ANNOUNCEMENT: Elevator ID %d died.", pp_elevators[i]->id);
-            for (int floor = 0; floor < N_FLOORS; floor++)
-                for (int button = 0; button < N_BUTTONS; button++)
-                    if (pp_elevators[i]->requests[floor][button])
-                    {
-                        if ((Button)button == B_Cab)
-                            printf("CRITICAL WARNING!!: Someone is stuck in elevator ID = %d !! \n", pp_elevators[i]->id);
-                        else 
-                        {
-                            request_data_t recoveredOrder = requestHandler_assignNewRequest(pp_elevators[0], floor, (Button)button);
-                            if (requestHandler_toTakeAssignedRequest(recoveredOrder))
-                                fsm_onRequestButtonPress(floor, (Button)button);
-                            else
-                                network_broadcast(&recoveredOrder);
-                        }
-                    }
-            requestHandler_clearAllHallwayRequests(pp_elevators[i]);
-        }
-        oldElevatorTimeOuts[i] = elevatorTimeOuts[i];
-    }
-}
-
-void getPointerToAllElevatorPointers(elevator_data_t** allElev)
-{
-    allElev[0] = fsm_getElevator();
-    elevator_data_t* p_othersTemp = requestHandler_getOtherElevators();
-    for (int i = 0; i < N_ELEVATORS-1; i++)
-    {
-        allElev[i+1] = p_othersTemp+i;
-    }
 }

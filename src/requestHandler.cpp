@@ -1,7 +1,8 @@
 #include "requestHandler.h"
 #include "fsm.h"
 
-float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f);
+float timeToServeRequest(elevator_data_t* e_old, Button b, int f);
+void getPointerToAllElevatorPointers(elevator_data_t** allElev);
 
 static elevator_data_t      otherElevators[N_ELEVATORS-1];
 
@@ -93,11 +94,11 @@ request_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int bt
         cost[i] = INT_MAX;
     }
 
-    cost[0] = costFunc_timeToServeRequest(elevator, btn_type, btn_floor);
+    cost[0] = timeToServeRequest(elevator, btn_type, btn_floor);
     int minCostIndex = 0;
     for (int i=1; i<N_ELEVATORS; i++) {
         if (!otherElevators[i-1].timer->isTimedOut() && otherElevators[i-1].floor > -1) {
-            cost[i] = costFunc_timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
+            cost[i] = timeToServeRequest(&otherElevators[i-1], btn_type, btn_floor);
             if (cost[i] < cost[i-1]) {
                 minCostIndex = i;
             }
@@ -113,7 +114,7 @@ request_data_t requestHandler_assignNewRequest(elevator_data_t* elevator, int bt
     return newRequest;
 }
 
-float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f)
+float timeToServeRequest(elevator_data_t* e_old, Button b, int f)
 {
     elevator_data_t e = *e_old;
 	if(e.id ==-1)
@@ -161,5 +162,50 @@ float costFunc_timeToServeRequest(elevator_data_t* e_old, Button b, int f)
         }
         e.floor += e.dirn;
         duration += TRAVEL_TIME_BETWEEN_FLOOR;
+    }
+}
+
+void requestHandler_handleDeadElevators(){
+    elevator_data_t* pp_elevators[N_ELEVATORS];
+	getPointerToAllElevatorPointers(pp_elevators); 
+    
+    static bool oldElevatorTimeOuts[N_ELEVATORS] = { };
+    bool elevatorTimeOuts[N_ELEVATORS] = { };
+
+    for (int i = 0; i < N_ELEVATORS; i++)
+       { elevatorTimeOuts[i] = pp_elevators[i]->timer->isTimedOut();}
+    for (int i = 0; i < N_ELEVATORS; i++)
+    {
+        if (elevatorTimeOuts[i] && (elevatorTimeOuts[i]) != oldElevatorTimeOuts[i])
+        {
+            printf("\nDEATH ANNOUNCEMENT: Elevator ID %d died.", pp_elevators[i]->id);
+            for (int floor = 0; floor < N_FLOORS; floor++)
+                for (int button = 0; button < N_BUTTONS; button++)
+                    if (pp_elevators[i]->requests[floor][button])
+                    {
+                        if ((Button)button == B_Cab)
+                            printf("CRITICAL WARNING!!: Someone is stuck in elevator ID = %d !! \n", pp_elevators[i]->id);
+                        else 
+                        {
+                            request_data_t recoveredOrder = requestHandler_assignNewRequest(pp_elevators[0], floor, (Button)button);
+                            if (requestHandler_toTakeAssignedRequest(recoveredOrder))
+                                fsm_onRequestButtonPress(floor, (Button)button);
+                            else
+                                network_broadcast(&recoveredOrder);
+                        }
+                    }
+            requestHandler_clearAllHallwayRequests(pp_elevators[i]);
+        }
+        oldElevatorTimeOuts[i] = elevatorTimeOuts[i];
+    }
+}
+
+void getPointerToAllElevatorPointers(elevator_data_t** allElev)
+{
+    allElev[0] = fsm_getElevator();
+    elevator_data_t* p_othersTemp = requestHandler_getOtherElevators();
+    for (int i = 0; i < N_ELEVATORS-1; i++)
+    {
+        allElev[i+1] = p_othersTemp+i;
     }
 }

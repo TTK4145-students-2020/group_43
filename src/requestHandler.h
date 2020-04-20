@@ -14,6 +14,7 @@
 
 void requestHandler_updateOtherElevators(elevator_data_t newElevState);
 void requestHandler_clearAllHallwayRequests(elevator_data_t* elevator);
+void requestHandler_handleDeadElevators();
 elevator_data_t* requestHandler_getElevatorBackup(int elevId);
 elevator_data_t* requestHandler_getOtherElevators(void);
 

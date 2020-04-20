@@ -5,22 +5,12 @@
 void network_broadcastMessage(message_t* order);
 void network_receive_message(const char* ip, char* data, int datalength);
 void network_forwardMessage(char* msg);
-void network_freeBufferReceivedMessage(uint8_t position);
-void network_checkAndRecoverTimesOut();
-uint8_t getOldestMessage();
 void network_printRawMessage(char* msg, uint16_t size);
-void checkNewElevatorId(char* data);
 
 
 message_t received_msg;
-char receivedMessage[SIZE_BUFFER_MESSAGES][NUMBER_MESSAGES][LENGHT_MESSAGE];
-//we want to be able to store all (NUMBER_MESSAGES) the messages (LENGHT_MESSAGE) sent by other elevators including possible errors(SIZE_BUFFER_MESSAGES)
-uint8_t numberOfMessagesReceived[SIZE_BUFFER_MESSAGES];
-threadTimer* receiveMessageTimer[SIZE_BUFFER_MESSAGES];
 uint8_t probaRandomError;
 bool elevatorRecovered = false;
-
-//uint8_t ID_ELEVATOR;
 
 
 void network_init(uint8_t probaErr)
@@ -50,9 +40,11 @@ void network_broadcast(order_data_t* order)
 
 void network_broadcast(elevator_data_t* elData)
 {
+	#if DEBUG == true
 	printf("SENDING:\n");
 	elevator_print(*elData);
 	printf("\n\n\n");
+	#endif
 	message_t msg;
 	msg.id = ID_ELEVATOR_MESSAGE;
 	msg.data.elevator = *elData;
@@ -106,64 +98,7 @@ void network_receive_message(const char* ip, char* data, int datalength)
     #if DEBUG == true
 	printf("Received UDP message from %s \t ID %u\n", ip,data[0]);
 	#endif
-	/*
-	if (data[0] == ID_ELEVATOR_MESSAGE)
-	{
-		memcpy(&received_msg,data,LENGHT_MESSAGE);
-		printf("RECEIVING:\n");
-		elevator_print(received_msg.data.elevator);
-		printf("\n\n\n");
-	}
-    //network_printRawMessage(data,LENGHT_MESSAGE);
-	uint8_t position;
-	uint8_t positionFound = 0;
-	
-	//check if we already received this message
-	for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
-	{
-		if(strcmp(receivedMessage[position][0],data) == 0) 
-		{
-			printf("We already received this message\n");
-			positionFound = 1;
-			break;
-		}
-	}
-	if (positionFound==0)
-	{
-		printf("First time we receive this message\n");
-		checkNewElevatorId(data);
-		//look for a free place to store the comming messages
-		network_checkAndRecoverTimesOut();
-		for(position = 0; position<SIZE_BUFFER_MESSAGES;position++)
-		{
-			
-			if(numberOfMessagesReceived[position] == 0)
-			{//this place is free
-				positionFound = 1;
-				receiveMessageTimer[position]->start();//we may not receive three messages, or had a bad ID. We have to free up the place after the timer is gone.
-				break;
-			}
-		}
-	}
-	if (positionFound ==0)
-	{
-		position = getOldestMessage();
-		network_freeBufferReceivedMessage(position);
-	}
-	//now position is the place where we should store the data
-	
-	//add the message received to the group of the same messages	
-	memcpy(receivedMessage[position][numberOfMessagesReceived[position]], data, LENGHT_MESSAGE);
-	printf("we store the message in position %u, %u\n",position, numberOfMessagesReceived[position]);
-	numberOfMessagesReceived[position]++;
-	if (numberOfMessagesReceived[position] == NUMBER_MESSAGES)
-	{//We received NUMBER_MESSAGES times the same message, no error!
 
-		network_forwardMessage(receivedMessage[position][0]);
-		network_freeBufferReceivedMessage(position);
-		receiveMessageTimer[position]->stop();
-	}
-*/	
 	network_forwardMessage(data);
 }
 
@@ -204,7 +139,7 @@ void network_forwardMessage(char* msg)
 			elevator_data_t* otherElevators = requestHandler_getOtherElevators();
 			for(uint8_t i = 0; i< NUMBER_ELEVATOR ; i++)
 				if (otherElevators[i].id == received_msg.data.IdToRecover)
-				{//works
+				{
 					network_broadcast(&(otherElevators[i]));
 					printf("Recovey possible, we found some elevator data\n");
 				}
@@ -216,53 +151,8 @@ void network_forwardMessage(char* msg)
 	}
 }
 
-void network_freeBufferReceivedMessage(uint8_t position)
-{
-	numberOfMessagesReceived[position] = 0;
-	for (uint8_t msg=0;msg<NUMBER_MESSAGES;msg++)
-		memset(receivedMessage[position][msg],0xFF,LENGHT_MESSAGE); //set default to msg to only 1 because only 0 is a valide message
-}
-
-void network_checkAndRecoverTimesOut()
-{
-	for(uint8_t pos = 0; pos< SIZE_BUFFER_MESSAGES; pos++)
-	{
-		if (receiveMessageTimer[pos]->isTimedOut())
-		{
-			printf("Time out for message at position %d. Checking if we ca extract data\n",pos);
-			if (numberOfMessagesReceived[pos]>= NUMBER_MESSAGES/2+1) //we need more than half the messages to correct
-			{
-				network_forwardMessage(receivedMessage[pos][0]);
-				network_freeBufferReceivedMessage(pos);
-				printf("data extracted\n");
-			}
-			receiveMessageTimer[pos]->stop();
-		}
-	}
-}
-
-uint8_t getOldestMessage()
-{
-	double longestTime = 0;
-	uint8_t indexMsgToDelete = SIZE_BUFFER_MESSAGES-1;
-	for (uint8_t i = 0 ; i < SIZE_BUFFER_MESSAGES ; i++)
-	{
-		if (receiveMessageTimer[i]->getTime() > longestTime)
-		{
-			indexMsgToDelete = i;
-			longestTime = receiveMessageTimer[i]->getTime();
-		}
-	}
-	return indexMsgToDelete;
-}
-
 void network_printRawMessage(char* msg, uint16_t size)
 {
 	for (uint16_t i = 0;i<size;i++)
 		printf("%d ",(int)msg[i]);
-}
-
-void checkNewElevatorId(char* data)
-{
-	
 }
